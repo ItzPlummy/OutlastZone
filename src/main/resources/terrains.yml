@@ -1,0 +1,31 @@
+terrains:
+  plain:
+    name: §ePlain
+    item: grass_block
+    biomes: [plains, sunflower_plains, savanna, meadow, cherry_grove]
+    structures: [pillager_outpost, village_plains, village_savanna, ruined_portal]
+  forest:
+    name: §2Forest
+    item: oak_log
+    biomes: [forest, flower_forest, taiga, old_growth_pine_taiga, old_growth_spruce_taiga, birch_forest, old_growth_birch_forest, dark_forest, pale_garden]
+    structures: [village_taiga, ruined_portal]
+  arid:
+    name: §6Arid
+    item: sand
+    biomes: [desert, badlands, wooded_badlands, eroded_badlands]
+    structures: [desert_pyramid, village_desert, ruined_portal_desert]
+  humid:
+    name: §aHumid
+    item: jungle_log
+    biomes: [jungle, sparse_jungle, bamboo_jungle, swamp, mangrove_swamp]
+    structures: [jungle_pyramid, swamp_hut, ruined_portal_jungle, ruined_portal_swamp]
+  highland:
+    name: §fHighland
+    item: stone
+    biomes: [jagged_peaks, frozen_peaks, stony_peaks, grove, snowy_slopes]
+    structures: [ruined_portal_mountain]
+  frozen:
+    name: §bFrozen
+    item: snow_block
+    biomes: [grove, snowy_slopes, snowy_taiga, snowy_plains, ice_spikes]
+    structures: [village_snowy, igloo]

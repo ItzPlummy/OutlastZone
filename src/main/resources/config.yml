@@ -1,0 +1,66 @@
+game:
+  min-players: 2
+  grind-stage-duration-seconds: 300
+  fight-stage-border-shrink-duration-seconds: 150
+
+grind-stage:
+  enhancements:
+    ore-generation-enhancement:
+      enable: true
+      replacement-chance: 0.2
+      replacements:
+        - [ coal_ore, [ copper_ore, iron_ore ] ]
+        - [ deepslate_coal_ore, [ deepslate_copper_ore, deepslate_iron_ore ] ]
+        - [ copper_ore, [ iron_ore ] ]
+        - [ deepslate_copper_ore, [ deepslate_iron_ore ] ]
+        - [ iron_ore, [ gold_ore, lapis_ore, raw_iron_block ] ]
+        - [ deepslate_iron_ore, [ deepslate_gold_ore, deepslate_lapis_ore, raw_iron_block ] ]
+        - [ gold_ore, [ diamond_ore, raw_gold_block ] ]
+        - [ deepslate_gold_ore, [ deepslate_diamond_ore, raw_gold_block ] ]
+        - [ lapis_ore, [ diamond_ore ] ]
+        - [ deepslate_lapis_ore, [ deepslate_diamond_ore ] ]
+        - [ redstone_ore, [ diamond_ore ] ]
+        - [ deepslate_redstone_ore, [ deepslate_diamond_ore ] ]
+        - [ emerald_ore, [ diamond_ore ] ]
+        - [ deepslate_emerald_ore, [ deepslate_diamond_ore ] ]
+    ore-loot-increase:
+      enable: true
+      min-modifier: 3
+      max-modifier: 5
+    mob-loot-increase:
+      enable: true
+      min-modifier: 3
+      max-modifier: 5
+    smelting-acceleration:
+      enable: true
+      speed-modifier: 0.25
+    blast-furnace-upgrade:
+      enable: true
+    smoker-upgrade:
+      enable: true
+    crafting-table-enchantment:
+      enable: true
+      levels:
+        default: 15
+        wooden: 5
+        stone: 5
+        copper: 5
+        leather: 10
+        chainmail: 15
+        iron: 10
+        golden: 20
+        diamond: 25
+        netherite: 30
+    exhaustion-accumulation:
+      enable: true
+      speed-modifier: 0.5
+    apple-chance-increase:
+      enable: true
+      chance-modifier: 5
+
+terrain-search:
+  max-tries: 5
+  outer-radius: 100000
+  structure-search-radius: 1024
+  inner-radius-multiplier: 50
+  grid-spacing: 8

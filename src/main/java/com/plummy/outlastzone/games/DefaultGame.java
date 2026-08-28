@@ -1,0 +1,327 @@
+package com.plummy.outlastzone.games;
+
+import com.plummy.outlastzone.locationFinders.LocationFinder;
+import com.plummy.outlastzone.players.ActivePlayer;
+import com.plummy.outlastzone.players.ActivePlayerRepository;
+import com.plummy.outlastzone.terrain.Terrain;
+import com.plummy.outlastzone.visual.DisplayWheelRegistry;
+import net.kyori.adventure.bossbar.BossBar;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.title.Title;
+import org.bukkit.GameRules;
+import org.bukkit.Location;
+import org.bukkit.Sound;
+import org.bukkit.World;
+import org.bukkit.entity.Player;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
+import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
+
+import java.util.concurrent.ThreadLocalRandom;
+
+import static com.plummy.outlastzone.OutlastZone.getGameManager;
+import static com.plummy.outlastzone.OutlastZone.getInstance;
+
+public class DefaultGame implements Game {
+
+    private final Terrain terrain;
+    private final ActivePlayerRepository activePlayers = ActivePlayerRepository.create();
+
+    private final BossBar grindCountdownBossBar = BossBar.bossBar(
+            Component.text("Grind Stage"),
+            0,
+            BossBar.Color.YELLOW,
+            BossBar.Overlay.PROGRESS
+    );
+
+    private final BossBar fightBossBar = BossBar.bossBar(
+            Component.text("Fight Stage"),
+            1,
+            BossBar.Color.RED,
+            BossBar.Overlay.PROGRESS
+    );
+
+    private GameStage stage = GameStage.IDLE;
+
+    private Location spawnLocation = null;
+    private BukkitTask grindCountdownTask = null;
+    private BukkitTask fightTask = null;
+
+    public DefaultGame(Terrain terrain) {
+        this.terrain = terrain;
+    }
+
+    @Override
+    public GameStage getStage() {
+        return stage;
+    }
+
+    @Override
+    public Terrain getTerrain() {
+        return terrain;
+    }
+
+    @Override
+    public ActivePlayerRepository getActivePlayers() {
+        return activePlayers;
+    }
+
+    @Override
+    public Location getSpawnLocation() {
+        return spawnLocation;
+    }
+
+    @Override
+    public void start(ActivePlayer host) {
+        setStage(GameStage.LOCATING);
+        findSpawnLocation(host.getBukkitPlayer().getWorld());
+
+        if (getSpawnLocation() == null) {
+            return;
+        }
+
+        setStage(GameStage.SETUP);
+
+        for (ActivePlayer player : getActivePlayers().getParticipants()) {
+            int maxDistanceFromSpawn = getInstance().getConfig().getInt("terrain-search.inner-radius-multiplier", 25) * getActivePlayers().getParticipantsCount() / 2;
+            double angle = ThreadLocalRandom.current().nextDouble() * Math.PI * 2;
+
+            Location playerSpawn = getSpawnLocation().clone().add((int) Math.cos(angle) * maxDistanceFromSpawn, 0, (int) Math.sin(angle) * maxDistanceFromSpawn);
+            playerSpawn.setY(getSpawnLocation().getWorld().getHighestBlockYAt(playerSpawn) + 51);
+            player.prepareForSetup();
+
+            player.getBukkitPlayer().teleport(playerSpawn);
+        }
+
+        prepareWorldForSetup();
+
+        new BukkitRunnable() {
+
+            @Override
+            public void run() {
+                for (ActivePlayer player : getActivePlayers().getParticipants()) {
+                    DisplayWheelRegistry.TERRAIN_DISPLAY_WHEEL.reveal(player, getTerrain(), () -> {});
+                }
+            }
+        }.runTaskLater(getInstance(), 40L);
+
+        new BukkitRunnable() {
+
+            @Override
+            public void run() {
+                endSetup();
+            }
+        }.runTaskLater(getInstance(), 190L);
+    }
+
+    @Override
+    public void startGrindStage() {
+        setStage(GameStage.GRINDING);
+
+        if (grindCountdownTask != null) grindCountdownTask.cancel();
+        grindCountdownTask = null;
+
+        if (fightTask != null) fightTask.cancel();
+        fightTask = null;
+
+        int durationSeconds = getInstance().getConfig().getInt("game.grind-stage-duration-seconds", 180);
+
+        grindCountdownBossBar.name(Component.text(getGrindCountdownBossBarName(0, durationSeconds)));
+        grindCountdownBossBar.progress(0);
+
+        for (ActivePlayer player : getActivePlayers().getAllOnlinePlayers()) {
+            player.getBukkitPlayer().removePotionEffect(PotionEffectType.GLOWING);
+
+            player.getBukkitPlayer().hideBossBar(fightBossBar);
+            player.getBukkitPlayer().showBossBar(grindCountdownBossBar);
+        }
+
+        grindCountdownTask = new BukkitRunnable() {
+
+            private int timer = 0;
+
+            @Override
+            public void run() {
+                timer++;
+
+                grindCountdownBossBar.progress((float) timer / durationSeconds);
+                grindCountdownBossBar.name(Component.text(getGrindCountdownBossBarName(timer, durationSeconds)));
+
+                for (ActivePlayer player : getActivePlayers().getAllOnlinePlayers()) {
+                    player.getBukkitPlayer().hideBossBar(fightBossBar);
+                    player.getBukkitPlayer().showBossBar(grindCountdownBossBar);
+                }
+
+                if (timer >= durationSeconds) {
+                    startFightStage();
+                }
+            }
+        }.runTaskTimer(getInstance(), 20L, 20L);
+    }
+
+    @Override
+    public void startFightStage() {
+        setStage(GameStage.FIGHTING);
+
+        int newBorderSize = getInstance().getConfig().getInt("terrain-search.inner-radius-multiplier", 25) * (getActivePlayers().getParticipantsCount() - 1) * 2 + 1;
+        int shrinkDuration = getInstance().getConfig().getInt("game.fight-stage-border-shrink-duration-seconds", 90) * 20;
+
+        getSpawnLocation().getWorld().getWorldBorder().changeSize(newBorderSize, shrinkDuration);
+
+        if (grindCountdownTask != null) grindCountdownTask.cancel();
+        grindCountdownTask = null;
+
+        if (fightTask != null) fightTask.cancel();
+        fightTask = null;
+
+        fightBossBar.name(Component.text(getFightBossBarName(0)));
+        fightBossBar.progress(1);
+
+        for (ActivePlayer player : getActivePlayers().getAllOnlinePlayers()) {
+            player.getBukkitPlayer().addPotionEffect(new PotionEffect(PotionEffectType.GLOWING, 9999999, 0, false, false, false));
+
+            player.getBukkitPlayer().hideBossBar(grindCountdownBossBar);
+            player.getBukkitPlayer().showBossBar(fightBossBar);
+        }
+
+        fightTask = new BukkitRunnable() {
+
+            private int timer = 0;
+
+            @Override
+            public void run() {
+                timer++;
+
+                fightBossBar.progress(1);
+                fightBossBar.name(Component.text(getFightBossBarName(timer)));
+
+                for (ActivePlayer player : getActivePlayers().getAllOnlinePlayers()) {
+                    player.getBukkitPlayer().hideBossBar(grindCountdownBossBar);
+                    player.getBukkitPlayer().showBossBar(fightBossBar);
+                }
+            }
+        }.runTaskTimer(getInstance(), 20L, 20L);
+    }
+
+    @Override
+    public void finish(GameFinishReason reason) {
+        setStage(GameStage.FINISHED);
+
+        if (grindCountdownTask != null) grindCountdownTask.cancel();
+        grindCountdownTask = null;
+
+        if (fightTask != null) fightTask.cancel();
+        fightTask = null;
+
+        if (reason == GameFinishReason.STOP_COMMAND_EXECUTED) {
+            for (ActivePlayer player : getActivePlayers().getAllOnlinePlayers()) {
+                Player bukkitPLayer = player.getBukkitPlayer();
+
+                bukkitPLayer.hideBossBar(grindCountdownBossBar);
+                bukkitPLayer.hideBossBar(fightBossBar);
+
+                player.messageToActionBar("§cGame Stopped");
+            }
+
+            return;
+        }
+
+        if (reason == GameFinishReason.NO_LOCATION_FOUND) {
+            return;
+        }
+
+        String title = "§cGame Over";
+        String subtitle;
+
+        if (getActivePlayers().getParticipantsCount() == 1) {
+            ActivePlayer lastPlayer = getActivePlayers().getParticipants().stream().findAny().orElseThrow();
+            subtitle = "§c" + lastPlayer.getName() + " outlasted everyone!";
+        } else {
+            subtitle = "";
+        }
+
+        new BukkitRunnable() {
+
+            @Override
+            public void run() {
+                for (ActivePlayer player : getActivePlayers().getAllOnlinePlayers()) {
+                    Player bukkitPLayer = player.getBukkitPlayer();
+
+                    bukkitPLayer.hideBossBar(grindCountdownBossBar);
+                    bukkitPLayer.hideBossBar(fightBossBar);
+
+                    bukkitPLayer.showTitle(Title.title(Component.text(title).asComponent(), Component.text(subtitle).asComponent()));
+                    bukkitPLayer.playSound(player.getBukkitPlayer().getLocation(), Sound.ENTITY_ENDER_DRAGON_DEATH, 1f, 1f);
+                }
+            }
+        }.runTaskLater(getInstance(), 20L);
+
+        getGameManager().removeGame();
+    }
+
+    protected void setStage(GameStage stage) {
+        this.stage = stage;
+    }
+
+    protected void setSpawnLocation(Location spawnLocation) {
+        this.spawnLocation = spawnLocation;
+    }
+
+    protected void findSpawnLocation(World world) {
+        getActivePlayers().messageToActionBar("§aSearching for suitable terrain...");
+
+        int outerRadius = getInstance().getConfig().getInt("terrain-search.outer-radius", 100000);
+        int searchRadius = getInstance().getConfig().getInt("terrain-search.structure-search-radius", 2048);
+        int innerRadius = getInstance().getConfig().getInt("terrain-search.inner-radius-multiplier", 25) * getActivePlayers().getParticipantsCount();
+
+        Location location = new LocationFinder(outerRadius, searchRadius, innerRadius).findLocation(world, getTerrain());
+
+        if (location == null) {
+            getActivePlayers().messageToActionBar("§cFailed to find suitable terrain");
+            finish(GameFinishReason.NO_LOCATION_FOUND);
+            return;
+        }
+
+        setSpawnLocation(location);
+    }
+
+    protected void prepareWorldForSetup() {
+        World world = getSpawnLocation().getWorld();
+
+        world.setTime(1000);
+        world.setStorm(false);
+        world.setThundering(false);
+
+        world.getWorldBorder().setCenter(getSpawnLocation());
+        world.getWorldBorder().setSize(999999);
+        world.getWorldBorder().setDamageBuffer(0);
+
+        world.setGameRule(GameRules.IMMEDIATE_RESPAWN, true);
+    }
+
+    protected void prepareWorldForGame() {
+        World world = getSpawnLocation().getWorld();
+        world.getWorldBorder().setSize(getInstance().getConfig().getInt("terrain-search.inner-radius-multiplier", 25) * getActivePlayers().getParticipantsCount() * 2 + 1);
+    }
+
+    protected void endSetup() {
+        for (ActivePlayer player : getActivePlayers().getParticipants()) {
+            player.prepareForGame();
+        }
+
+        prepareWorldForGame();
+
+        startGrindStage();
+    }
+
+    protected String getGrindCountdownBossBarName(int timer, int duration) {
+        int total = Math.max(0, duration - timer);
+        return "§e§lGrind Stage§e | " + String.format("%02d:%02d", total / 60, total % 60) + " left";
+    }
+
+    protected String getFightBossBarName(int timer) {
+        int total = Math.max(0, timer);
+        return "§c§lFight Stage§c | " + String.format("%02d:%02d", total / 60, total % 60);
+    }
+}
