@@ -9,6 +9,7 @@ import com.plummy.outlastzone.listeners.enhancement.FoodEnhancementListener;
 import com.plummy.outlastzone.listeners.enhancement.LootEnhancementListener;
 import com.plummy.outlastzone.listeners.enhancement.SmeltingEnhancementListener;
 import com.plummy.outlastzone.players.PersistentPlayerRepository;
+import com.plummy.outlastzone.pools.LocationPool;
 import com.plummy.outlastzone.terrain.TerrainRepository;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
@@ -28,21 +29,24 @@ public final class OutlastZone extends JavaPlugin {
     private static final NamespacedKey namespacedKey = Objects.requireNonNull(NamespacedKey.fromString("outlastzone"));
 
     private static OutlastZone instance;
-    private static GameManager gameManager;
-    private static PersistentPlayerRepository persistentPlayers;
-    private static TerrainRepository terrains;
     private static Logger logger;
 
-    {
-        logger = getLogger();
-    }
+    private static GameManager gameManager;
+    private static PersistentPlayerRepository persistentPlayers;
+
+    private static TerrainRepository terrains;
+    private static LocationPool locationPool;
 
     @Override
     public void onEnable() {
         instance = this;
+        logger = getLogger();
+
         gameManager = new GameManager();
         persistentPlayers = PersistentPlayerRepository.load();
+
         terrains = TerrainRepository.load();
+        locationPool = new LocationPool();
 
         saveDefaultConfig();
 
@@ -86,6 +90,10 @@ public final class OutlastZone extends JavaPlugin {
         return instance;
     }
 
+    public static Logger logger() {
+        return logger;
+    }
+
     public static GameManager getGameManager() {
         return gameManager;
     }
@@ -98,7 +106,7 @@ public final class OutlastZone extends JavaPlugin {
         return terrains;
     }
 
-    public static Logger logger() {
-        return logger;
+    public static LocationPool getLocationPool() {
+        return locationPool;
     }
 }

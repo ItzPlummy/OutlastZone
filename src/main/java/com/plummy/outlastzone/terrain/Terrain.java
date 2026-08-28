@@ -1,6 +1,6 @@
 package com.plummy.outlastzone.terrain;
 
-import com.plummy.outlastzone.visual.AbstractDisplayable;
+import com.plummy.outlastzone.visual.AbstractKeyedDisplayable;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Biome;
@@ -10,22 +10,15 @@ import org.bukkit.generator.structure.Structure;
 import java.util.List;
 import java.util.Set;
 
-public class Terrain extends AbstractDisplayable<BlockDisplay> {
+public class Terrain extends AbstractKeyedDisplayable<BlockDisplay> {
 
-    private final String key;
     private final Set<Biome> biomes;
     private final List<Structure> structures;
 
     public Terrain(String key, String name, Material item, Set<Biome> biomes, List<Structure> structures) {
-        super(name, item);
-
-        this.key = key;
+        super(key, name, item);
         this.biomes = biomes;
         this.structures = structures;
-    }
-
-    public String getKey() {
-        return key;
     }
 
     public Set<Biome> getBiomes() {
