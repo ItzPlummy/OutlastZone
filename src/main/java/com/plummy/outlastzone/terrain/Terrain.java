@@ -1,39 +1,36 @@
 package com.plummy.outlastzone.terrain;
 
-import com.plummy.outlastzone.visual.AbstractDisplayable;
+import com.plummy.outlastzone.visual.AbstractKeyedDisplayable;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Biome;
 import org.bukkit.entity.BlockDisplay;
 import org.bukkit.generator.structure.Structure;
 
-import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
-public class Terrain extends AbstractDisplayable<BlockDisplay> {
+public class Terrain extends AbstractKeyedDisplayable<BlockDisplay> {
 
-    private final String key;
     private final Set<Biome> biomes;
-    private final List<Structure> structures;
+    private final Map<Structure, Set<Biome>> structures;
 
-    public Terrain(String key, String name, Material item, Set<Biome> biomes, List<Structure> structures) {
-        super(name, item);
-
-        this.key = key;
+    public Terrain(String key, String name, Material item, Set<Biome> biomes, Map<Structure, Set<Biome>> structures) {
+        super(key, name, item);
         this.biomes = biomes;
         this.structures = structures;
-    }
-
-    public String getKey() {
-        return key;
     }
 
     public Set<Biome> getBiomes() {
         return biomes;
     }
 
-    public List<Structure> getStructures() {
+    public Map<Structure, Set<Biome>> getStructures() {
         return structures;
+    }
+
+    public Set<Biome> getStructureBiomes(Structure structure) {
+        return structures.getOrDefault(structure, Set.of());
     }
 
     @Override

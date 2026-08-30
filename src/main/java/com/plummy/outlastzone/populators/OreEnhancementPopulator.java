@@ -18,12 +18,12 @@ public class OreEnhancementPopulator extends BlockPopulator {
 
     @Override
     public void populate(@NotNull WorldInfo worldInfo, @NotNull Random random, int chunkX, int chunkZ, @NotNull LimitedRegion limitedRegion) {
-        if (!getInstance().getConfig().getBoolean("grind-stage.enhancements.ore-generation-enhancement.enable", true)) return;
+        if (!getInstance().getConfig().getBoolean("grind-phase.enhancements.ore-generation-enhancement.enable", true)) return;
 
         int baseX = chunkX << 4;
         int baseZ = chunkZ << 4;
 
-        double replacementChance = getInstance().getConfig().getDouble("grind-stage.enhancements.ore-generation-enhancement.replacement-chance", 0.2);
+        double replacementChance = getInstance().getConfig().getDouble("grind-phase.enhancements.ore-generation-enhancement.replacement-chance", 0.2);
 
         for (int x = baseX; x < baseX + 16; x++) {
             for (int z = baseZ; z < baseZ + 16; z++) {
@@ -47,7 +47,7 @@ public class OreEnhancementPopulator extends BlockPopulator {
 
     private static Map<Material, List<Material>> loadOreEnhancements() {
         Map<Material, List<Material>> enhancements = new HashMap<>();
-        ConfigurationSection replacementsSection = getInstance().getConfig().getConfigurationSection("grind-stage.enhancements.ore-generation-enhancement");
+        ConfigurationSection replacementsSection = getInstance().getConfig().getConfigurationSection("grind-phase.enhancements.ore-generation-enhancement");
 
         if (replacementsSection == null) {
             logger().warning("No ore-generation-enhancement configuration found.");

@@ -7,7 +7,7 @@ import org.bukkit.Location;
 
 public interface Game {
 
-    GameStage getStage();
+    GamePhase getPhase();
 
     Terrain getTerrain();
 
@@ -17,21 +17,21 @@ public interface Game {
 
     void start(ActivePlayer host);
 
-    void startGrindStage();
+    void startGrindPhase();
 
-    void startFightStage();
+    void startFightPhase();
 
     void finish(GameFinishReason reason);
 
     default boolean hasStarted() {
-        return getStage() != GameStage.IDLE;
+        return getPhase() != GamePhase.IDLE;
     }
 
     default boolean hasFinished() {
-        return getStage() == GameStage.FINISHED;
+        return getPhase() == GamePhase.FINISHED;
     }
 
     default boolean isSettingUp() {
-        return getStage() == GameStage.SETUP;
+        return getPhase() == GamePhase.SETUP;
     }
 }

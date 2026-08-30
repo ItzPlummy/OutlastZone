@@ -91,7 +91,7 @@ public class TerrainRepository {
         Set<Biome> biomes = new HashSet<>();
 
         for (String biomeName : section.getStringList("biomes")) {
-            Biome biome = RegistryAccess.registryAccess().getRegistry(RegistryKey.BIOME).get(NamespacedKey.minecraft(biomeName.toLowerCase()));
+            Biome biome = RegistryAccess.registryAccess().getRegistry(RegistryKey.BIOME).get(NamespacedKey.minecraft(biomeName.toLowerCase().replace("-", "_")));
 
             if (biome == null) {
                 logger().warning("Invalid biome in terrains: " + biomeName);
@@ -105,17 +105,38 @@ public class TerrainRepository {
             return null;
         }
 
-        List<Structure> structures = new ArrayList<>();
+        Map<Structure, Set<Biome>> structures = new HashMap<>();
+        ConfigurationSection structuresSection = section.getConfigurationSection("structures");
 
-        for (String structureName : section.getStringList("structures")) {
-            Structure structure = RegistryAccess.registryAccess().getRegistry(RegistryKey.STRUCTURE).get(NamespacedKey.minecraft(structureName.toLowerCase()));
+        if (structuresSection != null) {
+            for (String structureName : structuresSection.getKeys(false)) {
+                Structure structure = RegistryAccess.registryAccess().getRegistry(RegistryKey.STRUCTURE).get(NamespacedKey.minecraft(structureName.toLowerCase().replace("-", "_")));
 
-            if (structure == null) {
-                logger().warning("Invalid structure in terrains: " + structureName);
-                continue;
+                if (structure == null) {
+                    logger().warning("Invalid structure in terrains: " + structureName);
+                    continue;
+                }
+
+                Set<Biome> structureBiomes = new HashSet<>();
+
+                for (String biomeName : structuresSection.getStringList(structureName)) {
+                    Biome biome = RegistryAccess.registryAccess().getRegistry(RegistryKey.BIOME).get(NamespacedKey.minecraft(biomeName.toLowerCase().replace("-", "_")));
+
+                    if (biome == null) {
+                        logger().warning("Invalid biome in terrains: " + biomeName);
+                        continue;
+                    }
+
+                    structureBiomes.add(biome);
+                }
+
+                if (structureBiomes.isEmpty()) {
+                    logger().warning("Biome list is empty: " + structureName);
+                    continue;
+                }
+
+                structures.put(structure, structureBiomes);
             }
-
-            structures.add(structure);
         }
 
         return new Terrain(section.getName(), name, item, biomes, structures);
