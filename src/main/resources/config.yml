@@ -1,34 +1,83 @@
+# The minimum number of players required to start a game.
 min-players: 2
+
+# Border radius modifier per player count.
 border-radius-per-player: 25
 
+# Terrain search configuration.
 terrain-search:
+  # The optimal Y level to use when searching.
+  # Don't touch this unless you know what you're doing.
   optimal-y: 128
+
+  # The number of suitable locations for starting a game per terrain type.
+  # If there are insufficient locations in the pool, the plugin will attempt to find the missing locations, which will have a slight impact on the tick rate.
+  # High values may affect the server's tick rate at startup.
   locations-per-terrain: 3
+
+  # The time the plugin can spend searching for missing locations per tick, in milliseconds.
+  # Values above 10 will significantly impact the server tick rate.
+  # Values above 50 may likely crash the server on startup.
   execution-timeout-millis: 5
 
+  # Origin search configuration.
   origin-search:
+    # Maximum offset from zero coordinates when searching for a location.
+    # Values less than 100,000 can potentially force you to start the game in the same place over a long period of time.
     outer-radius: 1000000
+
+    # Inner radius for suitable biome search, which is used for a more optimized later search for structure.
     inner-radius: 2048
 
+  # Structure search configuration.
   structure-search:
+    # The radius used to search for a structure using atomic calls. Should preferably be evenly divisible by the delta value.
+    # Don't touch this unless you know what you're doing.
     radius: 1024
+
+    # Step size used for structure search.
+    # Don't touch this unless you know what you're doing.
     delta: 256
 
+  # Optimal selection configuration.
   optimal-selection:
+    # The number of attempts the plugin will make to search for an optimal location near a structure before choosing the best option or starting a new search.
     attempts: 4
+
+    # Minimum offset from the structure when searching for an optimal location.
     min-offset: 16
+
+    # Maximum offset from the structure when searching for an optimal location.
     max-offset: 48
+
+    # Radius used to determine coverage of suitable biomes using atomic calls. Should preferably be evenly divisible by the delta value.
+    # Don't touch this unless you know what you're doing.
     radius: 128
+
+    # Step size used for biome coverage determination.
+    # Don't touch this unless you know what you're doing.
     delta: 4
+
+    # Coverage threshold for suitable biomes.
+    # Locations with a percentage coverage greater than this value will be considered as candidates for spawn locations.
     threshold: 0.5
 
+# Grind stage configuration.
 grind-stage:
+  # Grind stage duration, in seconds.
   duration-seconds: 300
 
+  # Various enhancements that speed up development.
   enhancements:
+    # Ore generation configuration.
     ore-generation-enhancement:
+      # Whether enhanced ore generation is enabled or not.
       enabled: true
+
+      # The chance that an ore block will be replaced with another variant.
       replacement-chance: 0.2
+
+      # Replacement options for each ore.
       replacements:
         coal-ore: [copper_ore, iron_ore]
         deepslate-coal-ore: [deepslate_copper_ore, deepslate_iron_ore]
@@ -45,28 +94,52 @@ grind-stage:
         emerald-ore: [diamond_ore]
         deepslate-emerald-ore: [deepslate_diamond_ore]
 
+    # Ore loot increase configuration.
     ore-loot-increase:
+      # Whether ore loot enhancement is enabled or not.
       enabled: true
+
+      # The minimum value by which the drop can be increased.
       min-modifier: 3
+
+      # The maximum value by which the drop can be increased.
       max-modifier: 5
 
+    # Mob loot increase configuration.
     mob-loot-increase:
+      # Whether mob loot enhancement is enabled or not.
       enabled: true
+
+      # The minimum value by which the drop can be increased.
       min-modifier: 3
+
+      # The maximum value by which the drop can be increased.
       max-modifier: 5
 
+    # Smelting acceleration configuration.
     smelting-acceleration:
+      # Whether smelting enhancement is enabled or not.
       enabled: true
+
+      # Smelting speed modifier. Values less than 1 will speed up smelting for all kinds of furnaces.
       speed-modifier: 0.25
 
+    # Blast furnace upgrade configuration.
     blast-furnace-upgrade:
+      # Whether a furnace can be upgraded to a blast furnace by right-clicking with an iron ingot while shifting.
       enabled: true
 
+    # Smoker upgrade configuration.
     smoker-upgrade:
+      # Whether a furnace can be upgraded to a smoker by right-clicking with any log while shifting.
       enabled: true
 
+    # Crafting table enchantment configuration.
     crafting-table-enchantment:
+      # Whether it is possible to surround items in the crafting table with lapis lazuli for enchanting.
       enabled: true
+
+      # Enchantment level for each item type. Items such as a bow, shield, or trident will use the default level.
       levels:
         default: 15
         wooden: 5
@@ -79,9 +152,12 @@ grind-stage:
         diamond: 25
         netherite: 30
 
+    # Apple chance configuration (unused).
     apple-chance-increase:
       enabled: true
       chance-modifier: 5
 
+# Fight stage configuration.
 fight-stage:
+  # Border shrinking duration, in seconds. Should be less than grind stage duration to prevent shrinking overlap.
   border-narrowing-duration-seconds: 150
