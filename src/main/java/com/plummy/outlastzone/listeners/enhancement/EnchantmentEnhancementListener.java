@@ -17,8 +17,8 @@ import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
-import static com.plummy.outlastzone.OutlastZone.getInstance;
 import static com.plummy.outlastzone.OutlastZone.getNamespacedKey;
+import static com.plummy.outlastzone.OutlastZone.getSettings;
 
 public class EnchantmentEnhancementListener implements Listener {
 
@@ -125,7 +125,7 @@ public class EnchantmentEnhancementListener implements Listener {
         Recipe recipe = event.getRecipe();
         if (!(recipe instanceof Keyed keyed) || !keyed.getKey().equals(getNamespacedKey())) return;
 
-        if (!getInstance().getConfig().getBoolean("grind-phase.enhancements.crafting-table-enchantment.enable", true)) {
+        if (!getSettings().isCraftingTableEnchantmentEnabled()) {
             event.getInventory().setResult(new ItemStack(Material.AIR));
             return;
         }
@@ -136,7 +136,7 @@ public class EnchantmentEnhancementListener implements Listener {
 
         Random random = new Random(player.getEnchantmentSeed());
         String tier = TIERS.getOrDefault(center.getType(), "default");
-        int level = getInstance().getConfig().getInt("grind-phase.enhancements.crafting-table-enchantment.levels." + tier);
+        int level = getSettings().getCraftingTableEnchantmentLevel(tier);
 
         ItemStack result = center.clone();
         result.setAmount(1);

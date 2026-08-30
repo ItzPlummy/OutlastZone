@@ -1,45 +1,72 @@
-game:
-  min-players: 2
-  grind-stage-duration-seconds: 300
-  fight-stage-border-shrink-duration-seconds: 150
+min-players: 2
+border-radius-per-player: 25
+
+terrain-search:
+  optimal-y: 128
+  locations-per-terrain: 3
+  execution-timeout-millis: 5
+
+  origin-search:
+    outer-radius: 1000000
+    inner-radius: 2048
+
+  structure-search:
+    radius: 1024
+    delta: 256
+
+  optimal-selection:
+    attempts: 4
+    min-offset: 16
+    max-offset: 48
+    radius: 128
+    delta: 4
+    threshold: 0.5
 
 grind-stage:
+  duration-seconds: 300
+
   enhancements:
     ore-generation-enhancement:
-      enable: true
+      enabled: true
       replacement-chance: 0.2
       replacements:
-        - [ coal_ore, [ copper_ore, iron_ore ] ]
-        - [ deepslate_coal_ore, [ deepslate_copper_ore, deepslate_iron_ore ] ]
-        - [ copper_ore, [ iron_ore ] ]
-        - [ deepslate_copper_ore, [ deepslate_iron_ore ] ]
-        - [ iron_ore, [ gold_ore, lapis_ore, raw_iron_block ] ]
-        - [ deepslate_iron_ore, [ deepslate_gold_ore, deepslate_lapis_ore, raw_iron_block ] ]
-        - [ gold_ore, [ diamond_ore, raw_gold_block ] ]
-        - [ deepslate_gold_ore, [ deepslate_diamond_ore, raw_gold_block ] ]
-        - [ lapis_ore, [ diamond_ore ] ]
-        - [ deepslate_lapis_ore, [ deepslate_diamond_ore ] ]
-        - [ redstone_ore, [ diamond_ore ] ]
-        - [ deepslate_redstone_ore, [ deepslate_diamond_ore ] ]
-        - [ emerald_ore, [ diamond_ore ] ]
-        - [ deepslate_emerald_ore, [ deepslate_diamond_ore ] ]
+        coal-ore: [copper_ore, iron_ore]
+        deepslate-coal-ore: [deepslate_copper_ore, deepslate_iron_ore]
+        copper-ore: [iron_ore]
+        deepslate-copper-ore: [deepslate_iron_ore]
+        iron-ore: [gold_ore, lapis_ore]
+        deepslate-iron-ore: [deepslate_gold_ore, deepslate_lapis_ore]
+        gold-ore: [diamond_ore]
+        deepslate-gold-ore: [deepslate_diamond_ore]
+        lapis-ore: [diamond_ore]
+        deepslate-lapis-ore: [deepslate_diamond_ore]
+        redstone-ore: [diamond_ore]
+        deepslate-redstone-ore: [deepslate_diamond_ore]
+        emerald-ore: [diamond_ore]
+        deepslate-emerald-ore: [deepslate_diamond_ore]
+
     ore-loot-increase:
-      enable: true
+      enabled: true
       min-modifier: 3
       max-modifier: 5
+
     mob-loot-increase:
-      enable: true
+      enabled: true
       min-modifier: 3
       max-modifier: 5
+
     smelting-acceleration:
-      enable: true
+      enabled: true
       speed-modifier: 0.25
+
     blast-furnace-upgrade:
-      enable: true
+      enabled: true
+
     smoker-upgrade:
-      enable: true
+      enabled: true
+
     crafting-table-enchantment:
-      enable: true
+      enabled: true
       levels:
         default: 15
         wooden: 5
@@ -51,16 +78,10 @@ grind-stage:
         golden: 20
         diamond: 25
         netherite: 30
-    exhaustion-accumulation:
-      enable: true
-      speed-modifier: 0.5
+
     apple-chance-increase:
-      enable: true
+      enabled: true
       chance-modifier: 5
 
-terrain-search:
-  max-tries: 5
-  outer-radius: 100000
-  structure-search-radius: 1024
-  inner-radius-multiplier: 50
-  grid-spacing: 8
+fight-stage:
+  border-narrowing-duration-seconds: 150

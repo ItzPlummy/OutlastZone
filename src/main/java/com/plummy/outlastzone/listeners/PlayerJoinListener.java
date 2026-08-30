@@ -9,7 +9,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 
-import static com.plummy.outlastzone.OutlastZone.*;
+import static com.plummy.outlastzone.OutlastZone.getGameManager;
+import static com.plummy.outlastzone.OutlastZone.getPersistentPlayers;
 
 public class PlayerJoinListener implements Listener {
 

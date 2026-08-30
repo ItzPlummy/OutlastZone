@@ -18,23 +18,6 @@ import static com.plummy.outlastzone.OutlastZone.*;
 
 public class SpawnLocationWorker extends AbstractWorker {
 
-    private static final int OPTIMAL_Y = 128;
-    private static final int EXECUTION_TIMEOUT_MILLIS = 5;
-    private static final int MAX_LOCATIONS_PER_TERRAIN = 3;
-
-    private static final int OUTER_SEARCH_RADIUS = 1000000;
-    private static final int BIOME_SEARCH_RADIUS = 2048;
-
-    private static final int STRUCTURE_SEARCH_RADIUS = 1024;
-    private static final int STRUCTURE_SEARCH_DELTA = 256;
-
-    private static final int OPTIMAL_SELECT_COUNT = 4;
-    private static final int OPTIMAL_SELECT_MIN_RADIUS = 16;
-    private static final int OPTIMAL_SELECT_MAX_RADIUS = 48;
-    private static final int OPTIMAL_SELECT_SEARCH_RADIUS = 128;
-    private static final int OPTIMAL_SELECT_SEARCH_DELTA = 4;
-    private static final double OPTIMAL_SELECT_THRESHOLD = 0.5;
-
     private final World world;
 
     private long executionStartTime = 0;
@@ -71,7 +54,7 @@ public class SpawnLocationWorker extends AbstractWorker {
                     case SELECTING_OPTIMAL_LOCATION -> selectOptimalLocation();
                 }
 
-                if (System.nanoTime() - executionStartTime >= EXECUTION_TIMEOUT_MILLIS * 1000000) {
+                if (System.nanoTime() - executionStartTime >= getSettings().getTerrainSearchExecutionTimeoutMillis() * 1000000) {
                     return;
                 }
 
@@ -106,7 +89,7 @@ public class SpawnLocationWorker extends AbstractWorker {
 
         Map.Entry<Integer, Collection<Terrain>> lowestCountEntry = terrainsByFoundLocationsCount.firstEntry();
 
-        if (lowestCountEntry.getKey() >= MAX_LOCATIONS_PER_TERRAIN) {
+        if (lowestCountEntry.getKey() >= getSettings().getTerrainSearchLocationsPerTerrain()) {
             return;
         }
 
@@ -122,9 +105,9 @@ public class SpawnLocationWorker extends AbstractWorker {
 
     protected void searchForOrigin() {
         if (originSearchContext.getRandomOrigin() == null) {
-            int x = ThreadLocalRandom.current().nextInt(-OUTER_SEARCH_RADIUS, OUTER_SEARCH_RADIUS + 1);
-            int z = ThreadLocalRandom.current().nextInt(-OUTER_SEARCH_RADIUS, OUTER_SEARCH_RADIUS + 1);
-            originSearchContext.setRandomOrigin(new Location(world, x, OPTIMAL_Y, z));
+            int x = ThreadLocalRandom.current().nextInt(-getSettings().getOriginSearchOuterRadius(), getSettings().getOriginSearchOuterRadius() + 1);
+            int z = ThreadLocalRandom.current().nextInt(-getSettings().getOriginSearchOuterRadius(), getSettings().getOriginSearchOuterRadius() + 1);
+            originSearchContext.setRandomOrigin(new Location(world, x, getSettings().getTerrainSearchOptimalY(), z));
         }
 
         if (originSearchContext.getBiomes() == null) {
@@ -142,13 +125,13 @@ public class SpawnLocationWorker extends AbstractWorker {
         while (true) {
             BiomeSearchResult biomeSearchResult = world.locateNearestBiome(
                     originSearchContext.getRandomOrigin(),
-                    BIOME_SEARCH_RADIUS,
+                    getSettings().getOriginSearchInnerRadius(),
                     32,
                     384,
                     originSearchContext.getBiomes().toArray(Biome[]::new)
             );
 
-            if (System.nanoTime() - executionStartTime >= EXECUTION_TIMEOUT_MILLIS * 1000000) {
+            if (System.nanoTime() - executionStartTime >= getSettings().getTerrainSearchExecutionTimeoutMillis() * 1000000) {
                 setPhase(SpawnLocationWorkerPhase.IDLE);
                 return;
             }
@@ -157,27 +140,27 @@ public class SpawnLocationWorker extends AbstractWorker {
                 continue;
             }
 
-            structureSearchContext.setOrigin(new Location(world, biomeSearchResult.getLocation().getBlockX(), OPTIMAL_Y, biomeSearchResult.getLocation().getBlockZ()));
-            structureSearchContext.resetX(STRUCTURE_SEARCH_RADIUS);
-            structureSearchContext.resetZ(STRUCTURE_SEARCH_RADIUS);
+            structureSearchContext.setOrigin(new Location(world, biomeSearchResult.getLocation().getBlockX(), getSettings().getTerrainSearchOptimalY(), biomeSearchResult.getLocation().getBlockZ()));
+            structureSearchContext.resetX(getSettings().getStructureSearchRadius());
+            structureSearchContext.resetZ(getSettings().getStructureSearchRadius());
             setPhase(SpawnLocationWorkerPhase.SEARCHING_FOR_STRUCTURE);
             return;
         }
     }
 
     protected void searchForStructure() {
-        while (structureSearchContext.xIsWithinSearchRadius(STRUCTURE_SEARCH_RADIUS)) {
-            while (structureSearchContext.zIsWithinSearchRadius(STRUCTURE_SEARCH_RADIUS)) {
+        while (structureSearchContext.xIsWithinSearchRadius(getSettings().getStructureSearchRadius())) {
+            while (structureSearchContext.zIsWithinSearchRadius(getSettings().getStructureSearchRadius())) {
                 StructureSearchResult structureSearchResult = world.locateNearestStructure(
-                        new Location(world, structureSearchContext.getX(), OPTIMAL_Y, structureSearchContext.getZ()),
+                        new Location(world, structureSearchContext.getX(), getSettings().getTerrainSearchOptimalY(), structureSearchContext.getZ()),
                         structureSearchContext.getStructure(),
                         2,
                         false
                 );
 
-                structureSearchContext.setZ(structureSearchContext.getZ() + STRUCTURE_SEARCH_DELTA);
+                structureSearchContext.setZ(structureSearchContext.getZ() + getSettings().getStructureSearchDelta());
 
-                if (System.nanoTime() - executionStartTime >= EXECUTION_TIMEOUT_MILLIS * 1000000) {
+                if (System.nanoTime() - executionStartTime >= getSettings().getTerrainSearchExecutionTimeoutMillis() * 1000000) {
                     return;
                 }
 
@@ -185,23 +168,23 @@ public class SpawnLocationWorker extends AbstractWorker {
                     continue;
                 }
 
-                optimalLocationSelectContext.setOrigin(new Location(world, structureSearchResult.getLocation().getBlockX(), OPTIMAL_Y, structureSearchResult.getLocation().getBlockZ()));
+                optimalLocationSelectContext.setOrigin(new Location(world, structureSearchResult.getLocation().getBlockX(), getSettings().getTerrainSearchOptimalY(), structureSearchResult.getLocation().getBlockZ()));
                 setPhase(SpawnLocationWorkerPhase.SELECTING_OPTIMAL_LOCATION);
                 return;
             }
 
-            structureSearchContext.setX(structureSearchContext.getX() + STRUCTURE_SEARCH_DELTA);
-            structureSearchContext.resetZ(STRUCTURE_SEARCH_RADIUS);
+            structureSearchContext.setX(structureSearchContext.getX() + getSettings().getStructureSearchDelta());
+            structureSearchContext.resetZ(getSettings().getStructureSearchRadius());
         }
 
         setPhase(SpawnLocationWorkerPhase.IDLE);
     }
 
     protected void selectOptimalLocation() {
-        while (optimalLocationSelectContext.getCheckedLocationsCount() < OPTIMAL_SELECT_COUNT) {
+        while (optimalLocationSelectContext.getCheckedLocationsCount() < getSettings().getOptimalSelectionAttempts()) {
             if (optimalLocationSelectContext.getCurrentSelection() == null) {
-                int offsetX = ThreadLocalRandom.current().nextInt(OPTIMAL_SELECT_MIN_RADIUS, OPTIMAL_SELECT_MAX_RADIUS + 1);
-                int offsetZ = ThreadLocalRandom.current().nextInt(OPTIMAL_SELECT_MIN_RADIUS, OPTIMAL_SELECT_MAX_RADIUS + 1);
+                int offsetX = ThreadLocalRandom.current().nextInt(getSettings().getOptimalSelectionMinOffset(), getSettings().getOptimalSelectionMaxOffset() + 1);
+                int offsetZ = ThreadLocalRandom.current().nextInt(getSettings().getOptimalSelectionMinOffset(), getSettings().getOptimalSelectionMaxOffset() + 1);
 
                 if (ThreadLocalRandom.current().nextBoolean()) {
                     offsetX = -offsetX;
@@ -213,34 +196,34 @@ public class SpawnLocationWorker extends AbstractWorker {
                 int x = optimalLocationSelectContext.getOrigin().getBlockX() + offsetX;
                 int z = optimalLocationSelectContext.getOrigin().getBlockZ() + offsetZ;
 
-                x = x - x % OPTIMAL_SELECT_SEARCH_DELTA;
-                z = z - z % OPTIMAL_SELECT_SEARCH_DELTA;
+                x = x - x % getSettings().getOptimalSelectionDelta();
+                z = z - z % getSettings().getOptimalSelectionDelta();
 
-                optimalLocationSelectContext.setCurrentSelection(new Location(world, x, OPTIMAL_Y, z));
-                optimalLocationSelectContext.resetX(OPTIMAL_SELECT_SEARCH_RADIUS);
-                optimalLocationSelectContext.resetZ(OPTIMAL_SELECT_SEARCH_RADIUS);
+                optimalLocationSelectContext.setCurrentSelection(new Location(world, x, getSettings().getTerrainSearchOptimalY(), z));
+                optimalLocationSelectContext.resetX(getSettings().getOptimalSelectionRadius());
+                optimalLocationSelectContext.resetZ(getSettings().getOptimalSelectionRadius());
                 optimalLocationSelectContext.setSuitableCount(0);
                 optimalLocationSelectContext.setWholeCount(0);
             }
 
-            while (optimalLocationSelectContext.xIsWithinSearchRadius(OPTIMAL_SELECT_SEARCH_RADIUS)) {
-                while (optimalLocationSelectContext.zIsWithinSearchRadius(OPTIMAL_SELECT_SEARCH_RADIUS)) {
-                    Boolean isSuitable = optimalLocationSelectContext.getBiomeSuitability(OPTIMAL_Y, terrain.getBiomes());
+            while (optimalLocationSelectContext.xIsWithinSearchRadius(getSettings().getOptimalSelectionRadius())) {
+                while (optimalLocationSelectContext.zIsWithinSearchRadius(getSettings().getOptimalSelectionRadius())) {
+                    Boolean isSuitable = optimalLocationSelectContext.getBiomeSuitability(getSettings().getTerrainSearchOptimalY(), terrain.getBiomes());
 
                     optimalLocationSelectContext.setWholeCount(optimalLocationSelectContext.getWholeCount() + 1);
                     if (isSuitable != null && isSuitable) {
                         optimalLocationSelectContext.setSuitableCount(optimalLocationSelectContext.getSuitableCount() + 1);
                     }
 
-                    optimalLocationSelectContext.setZ(optimalLocationSelectContext.getZ() + OPTIMAL_SELECT_SEARCH_DELTA);
+                    optimalLocationSelectContext.setZ(optimalLocationSelectContext.getZ() + getSettings().getOptimalSelectionDelta());
 
-                    if (System.nanoTime() - executionStartTime >= EXECUTION_TIMEOUT_MILLIS * 1000000) {
+                    if (System.nanoTime() - executionStartTime >= getSettings().getTerrainSearchExecutionTimeoutMillis() * 1000000) {
                         return;
                     }
                 }
 
-                optimalLocationSelectContext.setX(optimalLocationSelectContext.getX() + OPTIMAL_SELECT_SEARCH_DELTA);
-                optimalLocationSelectContext.resetZ(OPTIMAL_SELECT_SEARCH_RADIUS);
+                optimalLocationSelectContext.setX(optimalLocationSelectContext.getX() + getSettings().getOptimalSelectionDelta());
+                optimalLocationSelectContext.resetZ(getSettings().getOptimalSelectionRadius());
             }
 
             Double score;
@@ -257,10 +240,9 @@ public class SpawnLocationWorker extends AbstractWorker {
 
         setPhase(SpawnLocationWorkerPhase.IDLE);
 
-        Location optimalLocation = optimalLocationSelectContext.getOptimalLocation(OPTIMAL_SELECT_THRESHOLD);
+        Location optimalLocation = optimalLocationSelectContext.getOptimalLocation(getSettings().getOptimalSelectionThreshold());
 
         if (optimalLocation != null) {
-            logger().info("Found optimal location: " + optimalLocation);
             getSpawnLocationPool().push(terrain, optimalLocation);
         }
     }

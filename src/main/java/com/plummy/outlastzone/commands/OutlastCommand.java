@@ -2,7 +2,6 @@ package com.plummy.outlastzone.commands;
 
 import com.plummy.outlastzone.games.Game;
 import com.plummy.outlastzone.games.GameFinishReason;
-import com.plummy.outlastzone.populators.OreEnhancementPopulator;
 import com.plummy.outlastzone.terrain.Terrain;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
@@ -46,7 +45,7 @@ public class OutlastCommand implements CommandExecutor {
             return;
         }
 
-        if (Bukkit.getOnlinePlayers().size() < getInstance().getConfig().getInt("game.min-players", 2)) {
+        if (Bukkit.getOnlinePlayers().size() < getSettings().getMinPlayers()) {
             sender.sendMessage("§cNot enough players are online to start the game");
             return;
         }
@@ -74,7 +73,7 @@ public class OutlastCommand implements CommandExecutor {
 
     protected void reload(CommandSender sender) {
         getInstance().reloadConfig();
-        OreEnhancementPopulator.reloadOreEnhancements();
+        getSettings().reload(getInstance().getConfig());
     }
 
     protected void help(CommandSender sender) {

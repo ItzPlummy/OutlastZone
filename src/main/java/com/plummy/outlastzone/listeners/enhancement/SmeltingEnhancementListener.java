@@ -17,14 +17,15 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 
 import static com.plummy.outlastzone.OutlastZone.getInstance;
+import static com.plummy.outlastzone.OutlastZone.getSettings;
 
 public class SmeltingEnhancementListener implements Listener {
 
     @EventHandler
     public void onFurnaceStartSmelt(FurnaceStartSmeltEvent event) {
-        if (!getInstance().getConfig().getBoolean("grind-phase.enhancements.smelting-acceleration.enable", true)) return;
+        if (!getSettings().isSmeltingAccelerationEnabled()) return;
 
-        event.setTotalCookTime((int) (event.getTotalCookTime() * getInstance().getConfig().getDouble("grind-phase.enhancements.smelting-acceleration.speed-modifier", 0.25)));
+        event.setTotalCookTime((int) (event.getTotalCookTime() * getSettings().getSmeltingAccelerationSpeedModifier()));
     }
 
     @EventHandler
@@ -40,9 +41,9 @@ public class SmeltingEnhancementListener implements Listener {
 
         Material targetType;
 
-        if (item.getType() == Material.IRON_INGOT && getInstance().getConfig().getBoolean("grind-phase.enhancements.blast-furnace-upgrade.enable", true)) {
+        if (item.getType() == Material.IRON_INGOT && getSettings().isBlastFurnaceUpgradeEnabled()) {
             targetType = Material.BLAST_FURNACE;
-        } else if (Tag.ITEMS_LOGS.isTagged(item.getType()) && getInstance().getConfig().getBoolean("grind-phase.enhancements.smoker-upgrade.enable", true)) {
+        } else if (Tag.ITEMS_LOGS.isTagged(item.getType()) && getSettings().isSmokerUpgradeEnabled()) {
             targetType = Material.SMOKER;
         } else {
             return;
@@ -83,8 +84,8 @@ public class SmeltingEnhancementListener implements Listener {
 
         short newCookTimeTotal = 100;
 
-        if (getInstance().getConfig().getBoolean("grind-phase.enhancements.smelting-acceleration.enable", true)) {
-            newCookTimeTotal = (short) (newCookTimeTotal * getInstance().getConfig().getDouble("grind-phase.enhancements.smelting-acceleration.speed-modifier", 0.25));
+        if (getInstance().getSettings().isSmeltingAccelerationEnabled()) {
+            newCookTimeTotal = (short) (newCookTimeTotal * getInstance().getSettings().getSmeltingAccelerationSpeedModifier());
         }
 
         Furnace cookState = (Furnace) block.getState();

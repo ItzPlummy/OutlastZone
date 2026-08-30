@@ -23,7 +23,7 @@ import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
 import static com.plummy.outlastzone.OutlastZone.getGameManager;
-import static com.plummy.outlastzone.OutlastZone.getInstance;
+import static com.plummy.outlastzone.OutlastZone.getSettings;
 
 public class LootEnhancementListener implements Listener {
 
@@ -31,7 +31,7 @@ public class LootEnhancementListener implements Listener {
 
     @EventHandler
     public void onBlockDropItem(BlockDropItemEvent event) {
-        if (!getInstance().getConfig().getBoolean("grind-phase.enhancements.ore-loot-increase.enable", true)) return;
+        if (!getSettings().isOreLootIncreaseEnabled()) return;
         if (!ORES.contains(event.getBlockState().getType())) return;
 
         Game game = getGameManager().getGame();
@@ -43,15 +43,15 @@ public class LootEnhancementListener implements Listener {
 
         if (event.getPlayer().getInventory().getItemInMainHand().getEnchantmentLevel(Enchantment.SILK_TOUCH) > 0) return;
 
-        double minModifier = getInstance().getConfig().getDouble("grind-phase.enhancements.ore-loot-increase.min-modifier");
-        double maxModifier = getInstance().getConfig().getDouble("grind-phase.enhancements.ore-loot-increase.max-modifier");
+        double minModifier = getSettings().getOreLootIncreaseMinModifier();
+        double maxModifier = getSettings().getOreLootIncreaseMaxModifier();
 
         enhanceItemLoot(event.getItems(), minModifier, maxModifier);
     }
 
     @EventHandler
     public void onEntityDeath(EntityDeathEvent event) {
-        if (!getInstance().getConfig().getBoolean("grind-phase.enhancements.mob-loot-increase.enable", true)) return;
+        if (!getSettings().isMobLootIncreaseEnabled()) return;
         if (!(event.getEntity() instanceof Lootable lootable)) return;
 
         Game game = getGameManager().getGame();
@@ -61,8 +61,8 @@ public class LootEnhancementListener implements Listener {
             return;
         }
 
-        int minModifier = getInstance().getConfig().getInt("grind-phase.enhancements.mob-loot-increase.min-modifier");
-        int maxModifier = getInstance().getConfig().getInt("grind-phase.enhancements.mob-loot-increase.max-modifier");
+        int minModifier = getSettings().getMobLootIncreaseMinModifier();
+        int maxModifier = getSettings().getMobLootIncreaseMaxModifier();
 
         enhanceLootableEntityLoot(event.getEntity(), lootable, event.getDrops(), minModifier, maxModifier);
     }

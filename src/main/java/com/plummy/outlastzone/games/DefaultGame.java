@@ -87,7 +87,7 @@ public class DefaultGame implements Game {
         setPhase(GamePhase.SETUP);
 
         for (ActivePlayer player : getActivePlayers().getParticipants()) {
-            int maxDistanceFromSpawn = getInstance().getConfig().getInt("terrain-search.inner-radius-multiplier", 25) * getActivePlayers().getParticipantsCount() / 2;
+            int maxDistanceFromSpawn = getSettings().getBorderSize(getActivePlayers().getParticipantsCount()) / 2;
             double angle = ThreadLocalRandom.current().nextDouble() * Math.PI * 2;
 
             Location playerSpawn = getSpawnLocation().clone().add((int) Math.cos(angle) * maxDistanceFromSpawn, 0, (int) Math.sin(angle) * maxDistanceFromSpawn);
@@ -128,7 +128,7 @@ public class DefaultGame implements Game {
         if (fightTask != null) fightTask.cancel();
         fightTask = null;
 
-        int durationSeconds = getInstance().getConfig().getInt("game.grind-phase-duration-seconds", 180);
+        int durationSeconds = getSettings().getGrindStageDurationSeconds();
 
         grindCountdownBossBar.name(Component.text(getGrindCountdownBossBarName(0, durationSeconds)));
         grindCountdownBossBar.progress(0);
@@ -167,8 +167,8 @@ public class DefaultGame implements Game {
     public void startFightPhase() {
         setPhase(GamePhase.FIGHTING);
 
-        int newBorderSize = getInstance().getConfig().getInt("terrain-search.inner-radius-multiplier", 25) * (getActivePlayers().getParticipantsCount() - 1) * 2 + 1;
-        int shrinkDuration = getInstance().getConfig().getInt("game.fight-phase-border-shrink-duration-seconds", 90) * 20;
+        int newBorderSize = getSettings().getBorderSize(getActivePlayers().getParticipantsCount() - 1);
+        int shrinkDuration = getSettings().getFightStageBorderNarrowingDurationSeconds() * 20;
 
         getSpawnLocation().getWorld().getWorldBorder().changeSize(newBorderSize, shrinkDuration);
 
@@ -287,7 +287,7 @@ public class DefaultGame implements Game {
 
     protected void prepareWorldForGame() {
         World world = getSpawnLocation().getWorld();
-        world.getWorldBorder().setSize(getInstance().getConfig().getInt("terrain-search.inner-radius-multiplier", 25) * getActivePlayers().getParticipantsCount() * 2 + 1);
+        world.getWorldBorder().setSize(getSettings().getBorderSize(getActivePlayers().getParticipantsCount()));
     }
 
     protected void endSetup() {

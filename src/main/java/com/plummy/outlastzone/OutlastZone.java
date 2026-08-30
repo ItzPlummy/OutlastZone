@@ -2,6 +2,7 @@ package com.plummy.outlastzone;
 
 import com.plummy.outlastzone.commands.OutlastCommand;
 import com.plummy.outlastzone.commands.OutlastTabCompleter;
+import com.plummy.outlastzone.core.Settings;
 import com.plummy.outlastzone.games.GameManager;
 import com.plummy.outlastzone.listeners.*;
 import com.plummy.outlastzone.listeners.enhancement.EnchantmentEnhancementListener;
@@ -24,13 +25,15 @@ import java.util.logging.Logger;
 
 import static com.plummy.outlastzone.listeners.enhancement.EnchantmentEnhancementListener.registerRecipe;
 import static com.plummy.outlastzone.populators.PopulatorRegistry.ORE_ENHANCEMENT_POPULATOR;
-import static org.bukkit.Bukkit.*;
+import static org.bukkit.Bukkit.getPluginManager;
+import static org.bukkit.Bukkit.getScheduler;
 
 public final class OutlastZone extends JavaPlugin {
 
     private static final NamespacedKey namespacedKey = Objects.requireNonNull(NamespacedKey.fromString("outlastzone"));
 
     private static OutlastZone instance;
+    private static Settings settings;
     private static Logger logger;
 
     private static GameManager gameManager;
@@ -44,13 +47,14 @@ public final class OutlastZone extends JavaPlugin {
     public void onEnable() {
         instance = this;
         logger = getLogger();
+        settings = new Settings(getConfig());
 
         gameManager = new GameManager();
         persistentPlayers = PersistentPlayerRepository.load();
 
         terrains = TerrainRepository.load();
         spawnLocationPool = new SpawnLocationPool();
-        spawnLocationWorker = new SpawnLocationWorker(Bukkit.getWorlds().getFirst());
+        spawnLocationWorker = new SpawnLocationWorker(Bukkit.getWorlds().getFirst(), 2);
 
         saveDefaultConfig();
 
@@ -96,6 +100,10 @@ public final class OutlastZone extends JavaPlugin {
 
     public static OutlastZone getInstance() {
         return instance;
+    }
+
+    public static Settings getSettings() {
+        return settings;
     }
 
     public static Logger logger() {
