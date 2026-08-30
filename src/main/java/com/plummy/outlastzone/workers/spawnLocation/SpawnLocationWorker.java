@@ -22,11 +22,11 @@ public class SpawnLocationWorker extends AbstractWorker {
     private static final int EXECUTION_TIMEOUT_MILLIS = 5;
     private static final int MAX_LOCATIONS_PER_TERRAIN = 3;
 
-    private static final int OUTER_SEARCH_RADIUS = 100000;
+    private static final int OUTER_SEARCH_RADIUS = 1000000;
     private static final int BIOME_SEARCH_RADIUS = 2048;
 
-    private static final int STRUCTURE_SEARCH_RADIUS = 2048;
-    private static final int STRUCTURE_SEARCH_DELTA = 128;
+    private static final int STRUCTURE_SEARCH_RADIUS = 1024;
+    private static final int STRUCTURE_SEARCH_DELTA = 256;
 
     private static final int OPTIMAL_SELECT_COUNT = 4;
     private static final int OPTIMAL_SELECT_MIN_RADIUS = 16;
@@ -171,7 +171,7 @@ public class SpawnLocationWorker extends AbstractWorker {
                 StructureSearchResult structureSearchResult = world.locateNearestStructure(
                         new Location(world, structureSearchContext.getX(), OPTIMAL_Y, structureSearchContext.getZ()),
                         structureSearchContext.getStructure(),
-                        4,
+                        2,
                         false
                 );
 
@@ -260,6 +260,7 @@ public class SpawnLocationWorker extends AbstractWorker {
         Location optimalLocation = optimalLocationSelectContext.getOptimalLocation(OPTIMAL_SELECT_THRESHOLD);
 
         if (optimalLocation != null) {
+            logger().info("Found optimal location: " + optimalLocation);
             getSpawnLocationPool().push(terrain, optimalLocation);
         }
     }
