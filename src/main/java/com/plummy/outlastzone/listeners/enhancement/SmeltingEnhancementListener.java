@@ -22,9 +22,9 @@ public class SmeltingEnhancementListener implements Listener {
 
     @EventHandler
     public void onFurnaceStartSmelt(FurnaceStartSmeltEvent event) {
-        if (!getInstance().getConfig().getBoolean("grind-stage.enhancements.smelting-acceleration.enable", true)) return;
+        if (!getInstance().getConfig().getBoolean("grind-phase.enhancements.smelting-acceleration.enable", true)) return;
 
-        event.setTotalCookTime((int) (event.getTotalCookTime() * getInstance().getConfig().getDouble("grind-stage.enhancements.smelting-acceleration.speed-modifier", 0.25)));
+        event.setTotalCookTime((int) (event.getTotalCookTime() * getInstance().getConfig().getDouble("grind-phase.enhancements.smelting-acceleration.speed-modifier", 0.25)));
     }
 
     @EventHandler
@@ -40,9 +40,9 @@ public class SmeltingEnhancementListener implements Listener {
 
         Material targetType;
 
-        if (item.getType() == Material.IRON_INGOT && getInstance().getConfig().getBoolean("grind-stage.enhancements.blast-furnace-upgrade.enable", true)) {
+        if (item.getType() == Material.IRON_INGOT && getInstance().getConfig().getBoolean("grind-phase.enhancements.blast-furnace-upgrade.enable", true)) {
             targetType = Material.BLAST_FURNACE;
-        } else if (Tag.ITEMS_LOGS.isTagged(item.getType()) && getInstance().getConfig().getBoolean("grind-stage.enhancements.smoker-upgrade.enable", true)) {
+        } else if (Tag.ITEMS_LOGS.isTagged(item.getType()) && getInstance().getConfig().getBoolean("grind-phase.enhancements.smoker-upgrade.enable", true)) {
             targetType = Material.SMOKER;
         } else {
             return;
@@ -83,8 +83,8 @@ public class SmeltingEnhancementListener implements Listener {
 
         short newCookTimeTotal = 100;
 
-        if (getInstance().getConfig().getBoolean("grind-stage.enhancements.smelting-acceleration.enable", true)) {
-            newCookTimeTotal = (short) (newCookTimeTotal * getInstance().getConfig().getDouble("grind-stage.enhancements.smelting-acceleration.speed-modifier", 0.25));
+        if (getInstance().getConfig().getBoolean("grind-phase.enhancements.smelting-acceleration.enable", true)) {
+            newCookTimeTotal = (short) (newCookTimeTotal * getInstance().getConfig().getDouble("grind-phase.enhancements.smelting-acceleration.speed-modifier", 0.25));
         }
 
         Furnace cookState = (Furnace) block.getState();

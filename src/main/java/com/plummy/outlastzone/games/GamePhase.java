@@ -1,6 +1,6 @@
 package com.plummy.outlastzone.games;
 
-public enum GameStage {
+public enum GamePhase {
 
     IDLE("idle"),
     LOCATING("locating"),
@@ -11,7 +11,7 @@ public enum GameStage {
 
     private final String name;
 
-    GameStage(String name) {
+    GamePhase(String name) {
         this.name = name;
     }
 
@@ -19,6 +19,7 @@ public enum GameStage {
         return name;
     }
 
+    @Override
     public String toString() {
         return getName();
     }

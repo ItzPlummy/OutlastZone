@@ -11,9 +11,9 @@ public class FoodEnhancementListener implements Listener {
 
     @EventHandler
     public void onEntityExhaustion(EntityExhaustionEvent event) {
-        if (!getInstance().getConfig().getBoolean("grind-stage.enhancements.exhaustion-accumulation.enable", true)) return;
+        if (!getInstance().getConfig().getBoolean("grind-phase.enhancements.exhaustion-accumulation.enable", true)) return;
 
-        event.setExhaustion((float) (event.getExhaustion() * getInstance().getConfig().getDouble("grind-stage.enhancements.exhaustion-accumulation.speed-modifier")));
+        event.setExhaustion((float) (event.getExhaustion() * getInstance().getConfig().getDouble("grind-phase.enhancements.exhaustion-accumulation.speed-modifier")));
     }
 
     @EventHandler

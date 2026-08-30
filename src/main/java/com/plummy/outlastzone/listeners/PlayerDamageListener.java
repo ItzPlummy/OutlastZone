@@ -1,7 +1,7 @@
 package com.plummy.outlastzone.listeners;
 
 import com.plummy.outlastzone.games.Game;
-import com.plummy.outlastzone.games.GameStage;
+import com.plummy.outlastzone.games.GamePhase;
 import com.plummy.outlastzone.players.ActivePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -20,7 +20,7 @@ public class PlayerDamageListener implements Listener {
 
         Game game = getGameManager().getGame();
 
-        if (game != null && game.getStage() == GameStage.FIGHTING) {
+        if (game != null && game.getPhase() == GamePhase.FIGHTING) {
             ActivePlayer activePlayer = game.getActivePlayers().getPlayer(player.getUniqueId());
 
             if (activePlayer != null && activePlayer.isPlaying()) {

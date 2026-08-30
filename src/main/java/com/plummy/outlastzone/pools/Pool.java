@@ -8,7 +8,5 @@ public interface Pool<T extends Keyed, V> {
 
     V pop(T item);
 
-    boolean contains(T item);
-
     int size(T item);
 }

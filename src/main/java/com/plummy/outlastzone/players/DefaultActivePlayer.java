@@ -2,7 +2,7 @@ package com.plummy.outlastzone.players;
 
 import com.plummy.outlastzone.games.Game;
 import com.plummy.outlastzone.games.GameFinishReason;
-import com.plummy.outlastzone.games.GameStage;
+import com.plummy.outlastzone.games.GamePhase;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -113,8 +113,8 @@ public class DefaultActivePlayer implements ActivePlayer {
             return;
         }
 
-        if (game.getStage() == GameStage.FIGHTING) {
-            game.startGrindStage();
+        if (game.getPhase() == GamePhase.FIGHTING) {
+            game.startGrindPhase();
         }
     }
 

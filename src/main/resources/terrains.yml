@@ -3,29 +3,50 @@ terrains:
     name: §ePlain
     item: grass_block
     biomes: [plains, sunflower_plains, savanna, meadow, cherry_grove]
-    structures: [pillager_outpost, village_plains, village_savanna, ruined_portal]
+    structures:
+      pillager-outpost: [plains, sunflower_plains, savanna, meadow]
+      ruined-portal: [plains, sunflower_plains, savanna, meadow, cherry_grove]
+      village-plains: [plains, sunflower_plains, meadow]
+      village-savanna: [savanna]
+
   forest:
     name: §2Forest
     item: oak_log
     biomes: [forest, flower_forest, taiga, old_growth_pine_taiga, old_growth_spruce_taiga, birch_forest, old_growth_birch_forest, dark_forest, pale_garden]
-    structures: [village_taiga, ruined_portal]
+    structures:
+      ruined-portal: [forest, flower_forest, taiga, old_growth_pine_taiga, old_growth_spruce_taiga, birch_forest, old_growth_birch_forest, dark_forest, pale_garden]
+      village-taiga: [taiga]
+
   arid:
     name: §6Arid
     item: sand
     biomes: [desert, badlands, wooded_badlands, eroded_badlands]
-    structures: [desert_pyramid, village_desert, ruined_portal_desert]
+    structures:
+      desert-pyramid: [desert]
+      ruined-portal: [desert, badlands, wooded_badlands, eroded_badlands]
+      village-desert: [desert]
+
   humid:
     name: §aHumid
     item: jungle_log
     biomes: [jungle, sparse_jungle, bamboo_jungle, swamp, mangrove_swamp]
-    structures: [jungle_pyramid, swamp_hut, ruined_portal_jungle, ruined_portal_swamp]
+    structures:
+      jungle-pyramid: [jungle, bamboo_jungle]
+      ruined-portal-jungle: [jungle, sparse_jungle, bamboo_jungle]
+      ruined-portal-swamp: [swamp, mangrove_swamp]
+      swamp-hut: [swamp]
+
   highland:
     name: §fHighland
     item: stone
     biomes: [jagged_peaks, frozen_peaks, stony_peaks, grove, snowy_slopes]
-    structures: [ruined_portal_mountain]
+    structures:
+      ruined-portal-mountain: [jagged_peaks, frozen_peaks, stony_peaks, grove, snowy_slopes]
+
   frozen:
     name: §bFrozen
     item: snow_block
     biomes: [grove, snowy_slopes, snowy_taiga, snowy_plains, ice_spikes]
-    structures: [village_snowy, igloo]
+    structures:
+      igloo: [snowy_slopes, snowy_taiga, snowy_plains]
+      village-snowy: [snowy_taiga]

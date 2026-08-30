@@ -125,7 +125,7 @@ public class EnchantmentEnhancementListener implements Listener {
         Recipe recipe = event.getRecipe();
         if (!(recipe instanceof Keyed keyed) || !keyed.getKey().equals(getNamespacedKey())) return;
 
-        if (!getInstance().getConfig().getBoolean("grind-stage.enhancements.crafting-table-enchantment.enable", true)) {
+        if (!getInstance().getConfig().getBoolean("grind-phase.enhancements.crafting-table-enchantment.enable", true)) {
             event.getInventory().setResult(new ItemStack(Material.AIR));
             return;
         }
@@ -136,7 +136,7 @@ public class EnchantmentEnhancementListener implements Listener {
 
         Random random = new Random(player.getEnchantmentSeed());
         String tier = TIERS.getOrDefault(center.getType(), "default");
-        int level = getInstance().getConfig().getInt("grind-stage.enhancements.crafting-table-enchantment.levels." + tier);
+        int level = getInstance().getConfig().getInt("grind-phase.enhancements.crafting-table-enchantment.levels." + tier);
 
         ItemStack result = center.clone();
         result.setAmount(1);

@@ -15,6 +15,7 @@ public enum ActivePlayerRole {
         return name;
     }
 
+    @Override
     public String toString() {
         return getName();
     }

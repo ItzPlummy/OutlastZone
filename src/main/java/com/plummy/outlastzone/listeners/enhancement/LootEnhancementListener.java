@@ -2,7 +2,7 @@ package com.plummy.outlastzone.listeners.enhancement;
 
 import com.destroystokyo.paper.MaterialTags;
 import com.plummy.outlastzone.games.Game;
-import com.plummy.outlastzone.games.GameStage;
+import com.plummy.outlastzone.games.GamePhase;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Item;
@@ -31,38 +31,38 @@ public class LootEnhancementListener implements Listener {
 
     @EventHandler
     public void onBlockDropItem(BlockDropItemEvent event) {
-        if (!getInstance().getConfig().getBoolean("grind-stage.enhancements.ore-loot-increase.enable", true)) return;
+        if (!getInstance().getConfig().getBoolean("grind-phase.enhancements.ore-loot-increase.enable", true)) return;
         if (!ORES.contains(event.getBlockState().getType())) return;
 
         Game game = getGameManager().getGame();
 
-        if (game == null || game.getStage() != GameStage.GRINDING) {
+        if (game == null || game.getPhase() != GamePhase.GRINDING) {
             event.getItems().clear();
             return;
         }
 
         if (event.getPlayer().getInventory().getItemInMainHand().getEnchantmentLevel(Enchantment.SILK_TOUCH) > 0) return;
 
-        double minModifier = getInstance().getConfig().getDouble("grind-stage.enhancements.ore-loot-increase.min-modifier");
-        double maxModifier = getInstance().getConfig().getDouble("grind-stage.enhancements.ore-loot-increase.max-modifier");
+        double minModifier = getInstance().getConfig().getDouble("grind-phase.enhancements.ore-loot-increase.min-modifier");
+        double maxModifier = getInstance().getConfig().getDouble("grind-phase.enhancements.ore-loot-increase.max-modifier");
 
         enhanceItemLoot(event.getItems(), minModifier, maxModifier);
     }
 
     @EventHandler
     public void onEntityDeath(EntityDeathEvent event) {
-        if (!getInstance().getConfig().getBoolean("grind-stage.enhancements.mob-loot-increase.enable", true)) return;
+        if (!getInstance().getConfig().getBoolean("grind-phase.enhancements.mob-loot-increase.enable", true)) return;
         if (!(event.getEntity() instanceof Lootable lootable)) return;
 
         Game game = getGameManager().getGame();
 
-        if (game == null || game.getStage() != GameStage.GRINDING) {
+        if (game == null || game.getPhase() != GamePhase.GRINDING) {
             event.getDrops().clear();
             return;
         }
 
-        int minModifier = getInstance().getConfig().getInt("grind-stage.enhancements.mob-loot-increase.min-modifier");
-        int maxModifier = getInstance().getConfig().getInt("grind-stage.enhancements.mob-loot-increase.max-modifier");
+        int minModifier = getInstance().getConfig().getInt("grind-phase.enhancements.mob-loot-increase.min-modifier");
+        int maxModifier = getInstance().getConfig().getInt("grind-phase.enhancements.mob-loot-increase.max-modifier");
 
         enhanceLootableEntityLoot(event.getEntity(), lootable, event.getDrops(), minModifier, maxModifier);
     }

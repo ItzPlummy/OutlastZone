@@ -9,8 +9,9 @@ import com.plummy.outlastzone.listeners.enhancement.FoodEnhancementListener;
 import com.plummy.outlastzone.listeners.enhancement.LootEnhancementListener;
 import com.plummy.outlastzone.listeners.enhancement.SmeltingEnhancementListener;
 import com.plummy.outlastzone.players.PersistentPlayerRepository;
-import com.plummy.outlastzone.pools.LocationPool;
+import com.plummy.outlastzone.pools.SpawnLocationPool;
 import com.plummy.outlastzone.terrain.TerrainRepository;
+import com.plummy.outlastzone.workers.spawnLocation.SpawnLocationWorker;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.World;
@@ -23,6 +24,7 @@ import java.util.logging.Logger;
 
 import static com.plummy.outlastzone.listeners.enhancement.EnchantmentEnhancementListener.registerRecipe;
 import static com.plummy.outlastzone.populators.PopulatorRegistry.ORE_ENHANCEMENT_POPULATOR;
+import static org.bukkit.Bukkit.*;
 
 public final class OutlastZone extends JavaPlugin {
 
@@ -35,7 +37,8 @@ public final class OutlastZone extends JavaPlugin {
     private static PersistentPlayerRepository persistentPlayers;
 
     private static TerrainRepository terrains;
-    private static LocationPool locationPool;
+    private static SpawnLocationPool spawnLocationPool;
+    private static SpawnLocationWorker spawnLocationWorker;
 
     @Override
     public void onEnable() {
@@ -46,7 +49,8 @@ public final class OutlastZone extends JavaPlugin {
         persistentPlayers = PersistentPlayerRepository.load();
 
         terrains = TerrainRepository.load();
-        locationPool = new LocationPool();
+        spawnLocationPool = new SpawnLocationPool();
+        spawnLocationWorker = new SpawnLocationWorker(Bukkit.getWorlds().getFirst());
 
         saveDefaultConfig();
 
@@ -72,14 +76,18 @@ public final class OutlastZone extends JavaPlugin {
         );
 
         for (Listener listener : listeners) {
-            Bukkit.getPluginManager().registerEvents(listener, this);
+            getPluginManager().registerEvents(listener, this);
         }
+
+        getScheduler().runTaskTimer(this, () -> {
+            spawnLocationWorker.step();
+        }, 1L, 1L);
     }
 
     @Override
     public void onDisable() {
+        Bukkit.getScheduler().cancelTasks(this);
         persistentPlayers.save();
-        Bukkit.getScheduler().cancelTasks(getInstance());
     }
 
     public static NamespacedKey getNamespacedKey() {
@@ -106,7 +114,7 @@ public final class OutlastZone extends JavaPlugin {
         return terrains;
     }
 
-    public static LocationPool getLocationPool() {
-        return locationPool;
+    public static SpawnLocationPool getSpawnLocationPool() {
+        return spawnLocationPool;
     }
 }

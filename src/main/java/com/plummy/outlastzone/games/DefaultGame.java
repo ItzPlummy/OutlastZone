@@ -1,6 +1,5 @@
 package com.plummy.outlastzone.games;
 
-import com.plummy.outlastzone.locationFinders.LocationFinder;
 import com.plummy.outlastzone.players.ActivePlayer;
 import com.plummy.outlastzone.players.ActivePlayerRepository;
 import com.plummy.outlastzone.terrain.Terrain;
@@ -20,8 +19,7 @@ import org.bukkit.scheduler.BukkitTask;
 
 import java.util.concurrent.ThreadLocalRandom;
 
-import static com.plummy.outlastzone.OutlastZone.getGameManager;
-import static com.plummy.outlastzone.OutlastZone.getInstance;
+import static com.plummy.outlastzone.OutlastZone.*;
 
 public class DefaultGame implements Game {
 
@@ -29,20 +27,20 @@ public class DefaultGame implements Game {
     private final ActivePlayerRepository activePlayers = ActivePlayerRepository.create();
 
     private final BossBar grindCountdownBossBar = BossBar.bossBar(
-            Component.text("Grind Stage"),
+            Component.text("Grind Phase"),
             0,
             BossBar.Color.YELLOW,
             BossBar.Overlay.PROGRESS
     );
 
     private final BossBar fightBossBar = BossBar.bossBar(
-            Component.text("Fight Stage"),
+            Component.text("Fight Phase"),
             1,
             BossBar.Color.RED,
             BossBar.Overlay.PROGRESS
     );
 
-    private GameStage stage = GameStage.IDLE;
+    private GamePhase phase = GamePhase.IDLE;
 
     private Location spawnLocation = null;
     private BukkitTask grindCountdownTask = null;
@@ -53,8 +51,8 @@ public class DefaultGame implements Game {
     }
 
     @Override
-    public GameStage getStage() {
-        return stage;
+    public GamePhase getPhase() {
+        return phase;
     }
 
     @Override
@@ -74,14 +72,19 @@ public class DefaultGame implements Game {
 
     @Override
     public void start(ActivePlayer host) {
-        setStage(GameStage.LOCATING);
-        findSpawnLocation(host.getBukkitPlayer().getWorld());
+        setPhase(GamePhase.LOCATING);
 
-        if (getSpawnLocation() == null) {
+        Location spawnLocation = getSpawnLocationPool().pop(getTerrain());
+
+        if (spawnLocation == null) {
+            getActivePlayers().messageToActionBar("§cLocation is not prepared. Try again later");
+            finish(GameFinishReason.NO_LOCATION_FOUND);
             return;
         }
 
-        setStage(GameStage.SETUP);
+        setSpawnLocation(spawnLocation);
+
+        setPhase(GamePhase.SETUP);
 
         for (ActivePlayer player : getActivePlayers().getParticipants()) {
             int maxDistanceFromSpawn = getInstance().getConfig().getInt("terrain-search.inner-radius-multiplier", 25) * getActivePlayers().getParticipantsCount() / 2;
@@ -116,8 +119,8 @@ public class DefaultGame implements Game {
     }
 
     @Override
-    public void startGrindStage() {
-        setStage(GameStage.GRINDING);
+    public void startGrindPhase() {
+        setPhase(GamePhase.GRINDING);
 
         if (grindCountdownTask != null) grindCountdownTask.cancel();
         grindCountdownTask = null;
@@ -125,7 +128,7 @@ public class DefaultGame implements Game {
         if (fightTask != null) fightTask.cancel();
         fightTask = null;
 
-        int durationSeconds = getInstance().getConfig().getInt("game.grind-stage-duration-seconds", 180);
+        int durationSeconds = getInstance().getConfig().getInt("game.grind-phase-duration-seconds", 180);
 
         grindCountdownBossBar.name(Component.text(getGrindCountdownBossBarName(0, durationSeconds)));
         grindCountdownBossBar.progress(0);
@@ -154,18 +157,18 @@ public class DefaultGame implements Game {
                 }
 
                 if (timer >= durationSeconds) {
-                    startFightStage();
+                    startFightPhase();
                 }
             }
         }.runTaskTimer(getInstance(), 20L, 20L);
     }
 
     @Override
-    public void startFightStage() {
-        setStage(GameStage.FIGHTING);
+    public void startFightPhase() {
+        setPhase(GamePhase.FIGHTING);
 
         int newBorderSize = getInstance().getConfig().getInt("terrain-search.inner-radius-multiplier", 25) * (getActivePlayers().getParticipantsCount() - 1) * 2 + 1;
-        int shrinkDuration = getInstance().getConfig().getInt("game.fight-stage-border-shrink-duration-seconds", 90) * 20;
+        int shrinkDuration = getInstance().getConfig().getInt("game.fight-phase-border-shrink-duration-seconds", 90) * 20;
 
         getSpawnLocation().getWorld().getWorldBorder().changeSize(newBorderSize, shrinkDuration);
 
@@ -206,7 +209,7 @@ public class DefaultGame implements Game {
 
     @Override
     public void finish(GameFinishReason reason) {
-        setStage(GameStage.FINISHED);
+        setPhase(GamePhase.FINISHED);
 
         if (grindCountdownTask != null) grindCountdownTask.cancel();
         grindCountdownTask = null;
@@ -221,7 +224,7 @@ public class DefaultGame implements Game {
                 bukkitPLayer.hideBossBar(grindCountdownBossBar);
                 bukkitPLayer.hideBossBar(fightBossBar);
 
-                player.messageToActionBar("§cGame Stopped");
+                player.messageToActionBar("§cGame stopped");
             }
 
             return;
@@ -260,30 +263,12 @@ public class DefaultGame implements Game {
         getGameManager().removeGame();
     }
 
-    protected void setStage(GameStage stage) {
-        this.stage = stage;
+    protected void setPhase(GamePhase phase) {
+        this.phase = phase;
     }
 
     protected void setSpawnLocation(Location spawnLocation) {
         this.spawnLocation = spawnLocation;
-    }
-
-    protected void findSpawnLocation(World world) {
-        getActivePlayers().messageToActionBar("§aSearching for suitable terrain...");
-
-        int outerRadius = getInstance().getConfig().getInt("terrain-search.outer-radius", 100000);
-        int searchRadius = getInstance().getConfig().getInt("terrain-search.structure-search-radius", 2048);
-        int innerRadius = getInstance().getConfig().getInt("terrain-search.inner-radius-multiplier", 25) * getActivePlayers().getParticipantsCount();
-
-        Location location = new LocationFinder(outerRadius, searchRadius, innerRadius).findLocation(world, getTerrain());
-
-        if (location == null) {
-            getActivePlayers().messageToActionBar("§cFailed to find suitable terrain");
-            finish(GameFinishReason.NO_LOCATION_FOUND);
-            return;
-        }
-
-        setSpawnLocation(location);
     }
 
     protected void prepareWorldForSetup() {
@@ -312,16 +297,16 @@ public class DefaultGame implements Game {
 
         prepareWorldForGame();
 
-        startGrindStage();
+        startGrindPhase();
     }
 
     protected String getGrindCountdownBossBarName(int timer, int duration) {
         int total = Math.max(0, duration - timer);
-        return "§e§lGrind Stage§e | " + String.format("%02d:%02d", total / 60, total % 60) + " left";
+        return "§e§lGrind Phase§e | " + String.format("%02d:%02d", total / 60, total % 60) + " left";
     }
 
     protected String getFightBossBarName(int timer) {
         int total = Math.max(0, timer);
-        return "§c§lFight Stage§c | " + String.format("%02d:%02d", total / 60, total % 60);
+        return "§c§lFight Phase§c | " + String.format("%02d:%02d", total / 60, total % 60);
     }
 }
