@@ -1,24 +1,18 @@
-package com.plummy.outlastzone.core.games.phases;
+package com.plummy.outlastzone.core.workers.phase;
 
 import com.plummy.outlastzone.core.data.repositories.ActivePlayerRepository;
 import com.plummy.outlastzone.core.visual.bossBars.BossBarDisplay;
-import com.plummy.outlastzone.core.visual.bossBars.GrindBossBar;
+import com.plummy.outlastzone.core.visual.bossBars.FightBossBar;
 import com.plummy.outlastzone.core.workers.AbstractPhaseWorker;
 
-public class GrindPhaseWorker extends AbstractPhaseWorker {
-
-    private static final long PERIOD_TICKS = 20L;
+public class FightPhaseWorker extends AbstractPhaseWorker {
 
     private final ActivePlayerRepository players;
     private final BossBarDisplay bossBar;
-    private final int durationSeconds;
-    private final Runnable onComplete;
 
-    public GrindPhaseWorker(ActivePlayerRepository players, int durationSeconds, Runnable onComplete) {
+    public FightPhaseWorker(ActivePlayerRepository players) {
         this.players = players;
-        this.bossBar = new GrindBossBar(durationSeconds);
-        this.durationSeconds = durationSeconds;
-        this.onComplete = onComplete;
+        this.bossBar = new FightBossBar();
     }
 
     public BossBarDisplay getBossBar() {
@@ -27,7 +21,7 @@ public class GrindPhaseWorker extends AbstractPhaseWorker {
 
     @Override
     protected long getPeriodTicks() {
-        return PERIOD_TICKS;
+        return 20;
     }
 
     @Override
@@ -41,9 +35,5 @@ public class GrindPhaseWorker extends AbstractPhaseWorker {
     @Override
     protected void onStep(int elapsed) {
         bossBar.update(elapsed);
-
-        if (elapsed >= durationSeconds) {
-            onComplete.run();
-        }
     }
 }

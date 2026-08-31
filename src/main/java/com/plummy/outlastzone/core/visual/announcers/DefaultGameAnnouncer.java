@@ -12,8 +12,6 @@ import static com.plummy.outlastzone.OutlastZone.getInstance;
 
 public class DefaultGameAnnouncer implements GameAnnouncer {
 
-    private static final long GAME_OVER_DELAY_TICKS = 20L;
-
     private final ActivePlayerRepository players;
 
     public DefaultGameAnnouncer(ActivePlayerRepository players) {
@@ -46,6 +44,6 @@ public class DefaultGameAnnouncer implements GameAnnouncer {
                     bukkitPlayer.playSound(bukkitPlayer.getLocation(), Sound.ENTITY_ENDER_DRAGON_DEATH, 1f, 1f);
                 }
             }
-        }.runTaskLater(getInstance(), GAME_OVER_DELAY_TICKS);
+        }.runTaskLater(getInstance(), 20);
     }
 }

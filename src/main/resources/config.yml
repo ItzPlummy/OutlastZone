@@ -116,6 +116,17 @@ grind-stage:
       # The maximum value by which the drop can be increased.
       max-modifier: 5
 
+    # Apple drop increase configuration.
+    apple-drop-increase:
+      # Whether increased chance of getting apples from leaf decay is enabled.
+      enabled: true
+
+      # The minimum value by which the drop can be increased.
+      min-modifier: 100
+
+      # The maximum value by which the drop can be increased.
+      max-modifier: 200
+
     # Smelting acceleration configuration.
     smelting-acceleration:
       # Whether smelting enhancement is enabled or not.
@@ -151,11 +162,6 @@ grind-stage:
         golden: 20
         diamond: 25
         netherite: 30
-
-    # Apple chance configuration (unused).
-    apple-chance-increase:
-      enabled: true
-      chance-modifier: 5
 
 # Fight stage configuration.
 fight-stage:

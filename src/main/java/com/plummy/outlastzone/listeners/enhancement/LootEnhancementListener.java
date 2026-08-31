@@ -31,7 +31,6 @@ public class LootEnhancementListener implements Listener {
 
     @EventHandler
     public void onBlockDropItem(BlockDropItemEvent event) {
-        if (!getSettings().isOreLootIncreaseEnabled()) return;
         if (!ORES.contains(event.getBlockState().getType())) return;
 
         Game game = getGameManager().getGame();
@@ -41,6 +40,7 @@ public class LootEnhancementListener implements Listener {
             return;
         }
 
+        if (!getSettings().isOreLootIncreaseEnabled()) return;
         if (event.getPlayer().getInventory().getItemInMainHand().getEnchantmentLevel(Enchantment.SILK_TOUCH) > 0) return;
 
         double minModifier = getSettings().getOreLootIncreaseMinModifier();
@@ -51,7 +51,6 @@ public class LootEnhancementListener implements Listener {
 
     @EventHandler
     public void onEntityDeath(EntityDeathEvent event) {
-        if (!getSettings().isMobLootIncreaseEnabled()) return;
         if (!(event.getEntity() instanceof Lootable lootable)) return;
 
         Game game = getGameManager().getGame();
@@ -60,6 +59,8 @@ public class LootEnhancementListener implements Listener {
             event.getDrops().clear();
             return;
         }
+
+        if (!getSettings().isMobLootIncreaseEnabled()) return;
 
         int minModifier = getSettings().getMobLootIncreaseMinModifier();
         int maxModifier = getSettings().getMobLootIncreaseMaxModifier();

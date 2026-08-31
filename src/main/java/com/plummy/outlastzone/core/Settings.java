@@ -109,11 +109,11 @@ public class Settings {
         return config.getBoolean("grind-stage.enhancements.ore-loot-increase.enabled");
     }
 
-    public int getOreLootIncreaseMinModifier() {
+    public double getOreLootIncreaseMinModifier() {
         return config.getInt("grind-stage.enhancements.ore-loot-increase.min-modifier");
     }
 
-    public int getOreLootIncreaseMaxModifier() {
+    public double getOreLootIncreaseMaxModifier() {
         return config.getInt("grind-stage.enhancements.ore-loot-increase.max-modifier");
     }
 
@@ -153,12 +153,16 @@ public class Settings {
         return config.getInt("grind-stage.enhancements.crafting-table-enchantment.levels." + tier);
     }
 
-    public boolean isAppleChanceIncreaseEnabled() {
-        return config.getBoolean("grind-stage.enhancements.apple-chance-increase.enabled");
+    public boolean isAppleDropIncreaseEnabled() {
+        return config.getBoolean("grind-stage.enhancements.apple-drop-increase.enabled");
     }
 
-    public int getAppleChanceIncreaseChanceModifier() {
-        return config.getInt("grind-stage.enhancements.apple-chance-increase.chance-modifier");
+    public int getAppleDropIncreaseMinModifier() {
+        return config.getInt("grind-stage.enhancements.apple-drop-increase.min-modifier");
+    }
+
+    public int getAppleDropIncreaseMaxModifier() {
+        return config.getInt("grind-stage.enhancements.apple-drop-increase.max-modifier");
     }
 
     public int getFightStageBorderNarrowingDurationSeconds() {

@@ -1,10 +1,10 @@
 package com.plummy.outlastzone.core.games;
 
-import com.plummy.outlastzone.core.games.arena.Arena;
-import com.plummy.outlastzone.core.games.arena.DefaultArena;
-import com.plummy.outlastzone.core.games.phases.FightPhaseWorker;
-import com.plummy.outlastzone.core.games.phases.GrindPhaseWorker;
-import com.plummy.outlastzone.core.games.phases.SetupPhaseWorker;
+import com.plummy.outlastzone.core.arenas.Arena;
+import com.plummy.outlastzone.core.arenas.DefaultArena;
+import com.plummy.outlastzone.core.workers.phase.FightPhaseWorker;
+import com.plummy.outlastzone.core.workers.phase.GrindPhaseWorker;
+import com.plummy.outlastzone.core.workers.phase.SetupPhaseWorker;
 import com.plummy.outlastzone.core.players.ActivePlayer;
 import com.plummy.outlastzone.core.data.repositories.ActivePlayerRepository;
 import com.plummy.outlastzone.core.keyed.Terrain;
@@ -32,9 +32,9 @@ public class DefaultGame implements Game {
     public DefaultGame(Terrain terrain) {
         this.terrain = terrain;
         this.activePlayers = new ActivePlayerRepository();
-        this.announcer = new DefaultGameAnnouncer(activePlayers);
+        this.announcer = new DefaultGameAnnouncer(getPlayers());
 
-        activePlayers.load();
+        getPlayers().load();
     }
 
     @Override
@@ -81,8 +81,7 @@ public class DefaultGame implements Game {
         Location spawnLocation = getSpawnLocationPool().pop(getTerrain());
 
         if (spawnLocation == null) {
-            getAnnouncer().locationNotReady();
-            finish(GameFinishReason.NO_LOCATION_FOUND);
+            finish(GameFinishReason.LOCATION_NOT_READY);
             return;
         }
 
@@ -152,7 +151,7 @@ public class DefaultGame implements Game {
         switch (reason) {
             case STOP_COMMAND_EXECUTED -> getAnnouncer().gameStopped();
             case PLAYER_OUTLASTED -> getAnnouncer().gameOver(getWinner());
-            case NO_LOCATION_FOUND -> {}
+            case LOCATION_NOT_READY -> getAnnouncer().locationNotReady();
         }
 
         getGameManager().removeGame();

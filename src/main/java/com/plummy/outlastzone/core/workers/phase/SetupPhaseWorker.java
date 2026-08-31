@@ -1,12 +1,8 @@
-package com.plummy.outlastzone.core.games.phases;
+package com.plummy.outlastzone.core.workers.phase;
 
 import com.plummy.outlastzone.core.workers.AbstractPhaseWorker;
 
 public class SetupPhaseWorker extends AbstractPhaseWorker {
-
-    private static final long PERIOD_TICKS = 1L;
-    private static final int REVEAL_TICK = 40;
-    private static final int COMPLETION_TICK = 190;
 
     private final Runnable onReveal;
     private final Runnable onComplete;
@@ -18,16 +14,16 @@ public class SetupPhaseWorker extends AbstractPhaseWorker {
 
     @Override
     protected long getPeriodTicks() {
-        return PERIOD_TICKS;
+        return 1;
     }
 
     @Override
     protected void onStep(int elapsed) {
-        if (elapsed == REVEAL_TICK) {
+        if (elapsed == 40) {
             onReveal.run();
         }
 
-        if (elapsed >= COMPLETION_TICK) {
+        if (elapsed >= 190) {
             stop();
             onComplete.run();
         }

@@ -11,14 +11,10 @@ public abstract class AbstractScheduledWorker implements ScheduledWorker {
 
     protected abstract long getPeriodTicks();
 
-    protected long getDelayTicks() {
-        return getPeriodTicks();
-    }
-
     @Override
     public void start() {
         stop();
-        task = Bukkit.getScheduler().runTaskTimer(getInstance(), this::execute, getDelayTicks(), getPeriodTicks());
+        task = Bukkit.getScheduler().runTaskTimer(getInstance(), this::execute, 20, getPeriodTicks());
     }
 
     @Override

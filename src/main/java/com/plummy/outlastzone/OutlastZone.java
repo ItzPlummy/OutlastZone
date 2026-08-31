@@ -7,7 +7,7 @@ import com.plummy.outlastzone.core.Settings;
 import com.plummy.outlastzone.core.games.GameManager;
 import com.plummy.outlastzone.listeners.*;
 import com.plummy.outlastzone.listeners.enhancement.EnchantmentEnhancementListener;
-import com.plummy.outlastzone.listeners.enhancement.FoodEnhancementListener;
+import com.plummy.outlastzone.listeners.enhancement.AppleEnhancementListener;
 import com.plummy.outlastzone.listeners.enhancement.LootEnhancementListener;
 import com.plummy.outlastzone.listeners.enhancement.SmeltingEnhancementListener;
 import com.plummy.outlastzone.core.pools.SpawnLocationPool;
@@ -68,9 +68,9 @@ public final class OutlastZone extends JavaPlugin {
                 new PlayerDeathListener(),
                 new PopulationListener(),
                 new LootEnhancementListener(),
+                new AppleEnhancementListener(),
                 new SmeltingEnhancementListener(),
-                new EnchantmentEnhancementListener(),
-                new FoodEnhancementListener()
+                new EnchantmentEnhancementListener()
         );
 
         for (Listener listener : listeners) {

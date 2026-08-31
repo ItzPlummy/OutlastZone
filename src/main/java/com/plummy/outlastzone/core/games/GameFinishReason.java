@@ -4,7 +4,7 @@ public enum GameFinishReason {
 
     PLAYER_OUTLASTED("playerOutlasted"),
     STOP_COMMAND_EXECUTED("stopCommandExecuted"),
-    NO_LOCATION_FOUND("noLocationFound");
+    LOCATION_NOT_READY("locationNotReady"),;
 
     private final String name;
 
