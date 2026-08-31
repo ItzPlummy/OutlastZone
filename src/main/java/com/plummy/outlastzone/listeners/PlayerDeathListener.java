@@ -20,7 +20,7 @@ public class PlayerDeathListener implements Listener {
         ActivePlayer activePlayer = game.getPlayers().get(event.getPlayer().getUniqueId());
         if (activePlayer == null || !activePlayer.isPlaying()) return;
 
-        activePlayer.eliminate();
+        game.eliminate(activePlayer);
 
         Component deathMessage = event.deathMessage();
 

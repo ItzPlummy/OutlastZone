@@ -1,6 +1,6 @@
 package com.plummy.outlastzone.terrain;
 
-import com.plummy.outlastzone.visual.AbstractKeyedDisplayable;
+import com.plummy.outlastzone.visual.displays.AbstractKeyedDisplayable;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Biome;

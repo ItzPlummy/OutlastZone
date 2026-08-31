@@ -1,10 +1,8 @@
 package com.plummy.outlastzone.players;
 
-import com.plummy.outlastzone.games.Game;
-import com.plummy.outlastzone.games.GameFinishReason;
-import com.plummy.outlastzone.games.GamePhase;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Statistic;
 import org.bukkit.advancement.Advancement;
@@ -22,10 +20,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 
-import static com.plummy.outlastzone.OutlastZone.getGameManager;
 import static com.plummy.outlastzone.OutlastZone.getInstance;
 
 public class DefaultActivePlayer implements ActivePlayer {
+
+    private static final int GLOW_DURATION_TICKS = 9999999;
 
     @NotNull
     private final PersistentPlayer persistentPlayer;
@@ -94,28 +93,33 @@ public class DefaultActivePlayer implements ActivePlayer {
     }
 
     @Override
-    public void eliminate() {
+    public void prepareForGrind() {
+        Player player = getBukkitPlayer();
+
+        if (player == null) return;
+
+        player.removePotionEffect(PotionEffectType.GLOWING);
+    }
+
+    @Override
+    public void prepareForFight() {
+        Player player = getBukkitPlayer();
+
+        if (player == null) return;
+
+        player.addPotionEffect(new PotionEffect(PotionEffectType.GLOWING, GLOW_DURATION_TICKS, 0, false, false, false));
+    }
+
+    @Override
+    public void eliminate(Location spectateLocation) {
         setRole(ActivePlayerRole.SPECTATOR);
 
-        if (isOnline()) {
-            getBukkitPlayer().setGameMode(GameMode.SPECTATOR);
-            getBukkitPlayer().teleport(getGameManager().getGame().getSpawnLocation());
-        }
+        Player player = getBukkitPlayer();
 
-        Game game = getGameManager().getGame();
+        if (player == null) return;
 
-        if (game == null) {
-            return;
-        }
-
-        if (game.getPlayers().onlineParticipantsCount() <= 1) {
-            game.finish(GameFinishReason.PLAYER_OUTLASTED);
-            return;
-        }
-
-        if (game.getPhase() == GamePhase.FIGHTING) {
-            game.startGrindPhase();
-        }
+        player.setGameMode(GameMode.SPECTATOR);
+        player.teleport(spectateLocation);
     }
 
     protected void setRole(@NotNull ActivePlayerRole role) {

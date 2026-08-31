@@ -1,4 +1,4 @@
-package com.plummy.outlastzone.visual;
+package com.plummy.outlastzone.visual.displays;
 
 import com.plummy.outlastzone.players.ActivePlayer;
 import org.bukkit.Location;

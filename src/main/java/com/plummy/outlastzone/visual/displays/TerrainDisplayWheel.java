@@ -1,4 +1,4 @@
-package com.plummy.outlastzone.visual;
+package com.plummy.outlastzone.visual.displays;
 
 import com.plummy.outlastzone.terrain.Terrain;
 import org.bukkit.entity.BlockDisplay;

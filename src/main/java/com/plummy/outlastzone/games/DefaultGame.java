@@ -1,23 +1,18 @@
 package com.plummy.outlastzone.games;
 
+import com.plummy.outlastzone.games.arena.Arena;
+import com.plummy.outlastzone.games.arena.DefaultArena;
+import com.plummy.outlastzone.games.phases.FightPhaseWorker;
+import com.plummy.outlastzone.games.phases.GrindPhaseWorker;
+import com.plummy.outlastzone.games.phases.SetupPhaseWorker;
 import com.plummy.outlastzone.players.ActivePlayer;
 import com.plummy.outlastzone.repositories.ActivePlayerRepository;
 import com.plummy.outlastzone.terrain.Terrain;
-import com.plummy.outlastzone.visual.DisplayWheelRegistry;
-import net.kyori.adventure.bossbar.BossBar;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.title.Title;
-import org.bukkit.GameRules;
+import com.plummy.outlastzone.visual.bossBars.BossBarDisplay;
+import com.plummy.outlastzone.visual.announcers.DefaultGameAnnouncer;
+import com.plummy.outlastzone.visual.displays.DisplayWheelRegistry;
+import com.plummy.outlastzone.visual.announcers.GameAnnouncer;
 import org.bukkit.Location;
-import org.bukkit.Sound;
-import org.bukkit.World;
-import org.bukkit.entity.Player;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
-import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.scheduler.BukkitTask;
-
-import java.util.concurrent.ThreadLocalRandom;
 
 import static com.plummy.outlastzone.OutlastZone.*;
 
@@ -25,30 +20,19 @@ public class DefaultGame implements Game {
 
     private final Terrain terrain;
     private final ActivePlayerRepository activePlayers;
-
-    private final BossBar grindCountdownBossBar = BossBar.bossBar(
-            Component.text("Grind Phase"),
-            0,
-            BossBar.Color.YELLOW,
-            BossBar.Overlay.PROGRESS
-    );
-
-    private final BossBar fightBossBar = BossBar.bossBar(
-            Component.text("Fight Phase"),
-            1,
-            BossBar.Color.RED,
-            BossBar.Overlay.PROGRESS
-    );
+    private final GameAnnouncer announcer;
 
     private GamePhase phase = GamePhase.IDLE;
 
-    private Location spawnLocation = null;
-    private BukkitTask grindCountdownTask = null;
-    private BukkitTask fightTask = null;
+    private Arena arena = null;
+    private SetupPhaseWorker setupWorker = null;
+    private GrindPhaseWorker grindWorker = null;
+    private FightPhaseWorker fightWorker = null;
 
     public DefaultGame(Terrain terrain) {
         this.terrain = terrain;
         this.activePlayers = new ActivePlayerRepository();
+        this.announcer = new DefaultGameAnnouncer(activePlayers);
 
         activePlayers.load();
     }
@@ -68,9 +52,26 @@ public class DefaultGame implements Game {
         return activePlayers;
     }
 
+    public GameAnnouncer getAnnouncer() {
+        return announcer;
+    }
+
     @Override
-    public Location getSpawnLocation() {
-        return spawnLocation;
+    public Arena getArena() {
+        return arena;
+    }
+
+    @Override
+    public BossBarDisplay getActiveBossBar() {
+        if (grindWorker != null) {
+            return grindWorker.getBossBar();
+        }
+
+        if (fightWorker != null) {
+            return fightWorker.getBossBar();
+        }
+
+        return null;
     }
 
     @Override
@@ -80,186 +81,79 @@ public class DefaultGame implements Game {
         Location spawnLocation = getSpawnLocationPool().pop(getTerrain());
 
         if (spawnLocation == null) {
-            getPlayers().messageToActionBar("§cLocation is not prepared. Try again later");
+            getAnnouncer().locationNotReady();
             finish(GameFinishReason.NO_LOCATION_FOUND);
             return;
         }
 
-        setSpawnLocation(spawnLocation);
+        setArena(new DefaultArena(spawnLocation));
 
         setPhase(GamePhase.SETUP);
 
         for (ActivePlayer player : getPlayers().allOnlineParticipants()) {
-            int maxDistanceFromSpawn = getSettings().getBorderSize(getPlayers().onlineParticipantsCount()) / 2;
-            double angle = ThreadLocalRandom.current().nextDouble() * Math.PI * 2;
-
-            Location playerSpawn = getSpawnLocation().clone().add((int) Math.cos(angle) * maxDistanceFromSpawn, 0, (int) Math.sin(angle) * maxDistanceFromSpawn);
-            playerSpawn.setY(getSpawnLocation().getWorld().getHighestBlockYAt(playerSpawn) + 51);
             player.prepareForSetup();
-
-            player.getBukkitPlayer().teleport(playerSpawn);
+            player.getBukkitPlayer().teleport(getArena().scatterPoint(getPlayers().onlineParticipantsCount()));
         }
 
-        prepareWorldForSetup();
+        getArena().prepareForSetup();
 
-        new BukkitRunnable() {
-
-            @Override
-            public void run() {
-                for (ActivePlayer player : getPlayers().allOnlineParticipants()) {
-                    DisplayWheelRegistry.TERRAIN_DISPLAY_WHEEL.reveal(player, getTerrain(), () -> {});
-                }
-            }
-        }.runTaskLater(getInstance(), 40L);
-
-        new BukkitRunnable() {
-
-            @Override
-            public void run() {
-                endSetup();
-            }
-        }.runTaskLater(getInstance(), 190L);
+        setupWorker = new SetupPhaseWorker(this::revealTerrain, this::endSetup);
+        setupWorker.start();
     }
 
     @Override
     public void startGrindPhase() {
         setPhase(GamePhase.GRINDING);
 
-        if (grindCountdownTask != null) grindCountdownTask.cancel();
-        grindCountdownTask = null;
+        stopWorkers();
 
-        if (fightTask != null) fightTask.cancel();
-        fightTask = null;
+        getPlayers().allOnline().forEach(ActivePlayer::prepareForGrind);
 
-        int durationSeconds = getSettings().getGrindStageDurationSeconds();
-
-        grindCountdownBossBar.name(Component.text(getGrindCountdownBossBarName(0, durationSeconds)));
-        grindCountdownBossBar.progress(0);
-
-        for (ActivePlayer player : getPlayers().allOnline()) {
-            player.getBukkitPlayer().removePotionEffect(PotionEffectType.GLOWING);
-            player.getBukkitPlayer().hideBossBar(fightBossBar);
-            player.getBukkitPlayer().showBossBar(grindCountdownBossBar);
-        }
-
-        grindCountdownTask = new BukkitRunnable() {
-
-            private int timer = 0;
-
-            @Override
-            public void run() {
-                timer++;
-
-                grindCountdownBossBar.progress((float) timer / durationSeconds);
-                grindCountdownBossBar.name(Component.text(getGrindCountdownBossBarName(timer, durationSeconds)));
-
-                for (ActivePlayer player : getPlayers().allOnline()) {
-                    player.getBukkitPlayer().hideBossBar(fightBossBar);
-                    player.getBukkitPlayer().showBossBar(grindCountdownBossBar);
-                }
-
-                if (timer >= durationSeconds) {
-                    startFightPhase();
-                }
-            }
-        }.runTaskTimer(getInstance(), 20L, 20L);
+        grindWorker = new GrindPhaseWorker(getPlayers(), getSettings().getGrindStageDurationSeconds(), this::startFightPhase);
+        grindWorker.start();
     }
 
     @Override
     public void startFightPhase() {
         setPhase(GamePhase.FIGHTING);
 
-        int newBorderSize = getSettings().getBorderSize(getPlayers().onlineParticipantsCount() - 1);
         int shrinkDuration = getSettings().getFightStageBorderNarrowingDurationSeconds() * 20;
 
-        getSpawnLocation().getWorld().getWorldBorder().changeSize(newBorderSize, shrinkDuration);
+        getArena().shrinkBorder(getPlayers().onlineParticipantsCount() - 1, shrinkDuration);
 
-        if (grindCountdownTask != null) grindCountdownTask.cancel();
-        grindCountdownTask = null;
+        stopWorkers();
 
-        if (fightTask != null) fightTask.cancel();
-        fightTask = null;
+        getPlayers().allOnline().forEach(ActivePlayer::prepareForFight);
 
-        fightBossBar.name(Component.text(getFightBossBarName(0)));
-        fightBossBar.progress(1);
+        fightWorker = new FightPhaseWorker(getPlayers());
+        fightWorker.start();
+    }
 
-        for (ActivePlayer player : getPlayers().allOnline()) {
-            player.getBukkitPlayer().addPotionEffect(new PotionEffect(PotionEffectType.GLOWING, 9999999, 0, false, false, false));
-            player.getBukkitPlayer().hideBossBar(grindCountdownBossBar);
-            player.getBukkitPlayer().showBossBar(fightBossBar);
+    @Override
+    public void eliminate(ActivePlayer player) {
+        player.eliminate(getArena().getSpawnLocation());
+
+        if (getPlayers().onlineParticipantsCount() <= 1) {
+            finish(GameFinishReason.PLAYER_OUTLASTED);
+            return;
         }
 
-        fightTask = new BukkitRunnable() {
-
-            private int timer = 0;
-
-            @Override
-            public void run() {
-                timer++;
-
-                fightBossBar.progress(1);
-                fightBossBar.name(Component.text(getFightBossBarName(timer)));
-
-                for (ActivePlayer player : getPlayers().allOnline()) {
-                    player.getBukkitPlayer().hideBossBar(grindCountdownBossBar);
-                    player.getBukkitPlayer().showBossBar(fightBossBar);
-                }
-            }
-        }.runTaskTimer(getInstance(), 20L, 20L);
+        if (getPhase() == GamePhase.FIGHTING) {
+            startGrindPhase();
+        }
     }
 
     @Override
     public void finish(GameFinishReason reason) {
         setPhase(GamePhase.FINISHED);
 
-        if (grindCountdownTask != null) grindCountdownTask.cancel();
-        grindCountdownTask = null;
+        stopWorkers();
 
-        if (fightTask != null) fightTask.cancel();
-        fightTask = null;
-
-        if (reason == GameFinishReason.STOP_COMMAND_EXECUTED) {
-            for (ActivePlayer player : getPlayers().allOnline()) {
-                Player bukkitPLayer = player.getBukkitPlayer();
-
-                bukkitPLayer.hideBossBar(grindCountdownBossBar);
-                bukkitPLayer.hideBossBar(fightBossBar);
-
-                player.messageToActionBar("§cGame stopped");
-            }
-
-            return;
+        switch (reason) {
+            case STOP_COMMAND_EXECUTED -> getAnnouncer().gameStopped();
+            case PLAYER_OUTLASTED -> getAnnouncer().gameOver(getWinner());
+            case NO_LOCATION_FOUND -> {}
         }
-
-        if (reason == GameFinishReason.NO_LOCATION_FOUND) {
-            return;
-        }
-
-        String title = "§cGame Over";
-        String subtitle;
-
-        if (getPlayers().onlineParticipantsCount() == 1) {
-            ActivePlayer lastPlayer = getPlayers().allOnlineParticipants().stream().findAny().orElseThrow();
-            subtitle = "§c" + lastPlayer.getName() + " outlasted everyone!";
-        } else {
-            subtitle = "";
-        }
-
-        new BukkitRunnable() {
-
-            @Override
-            public void run() {
-                for (ActivePlayer player : getPlayers().allOnline()) {
-                    Player bukkitPLayer = player.getBukkitPlayer();
-
-                    bukkitPLayer.hideBossBar(grindCountdownBossBar);
-                    bukkitPLayer.hideBossBar(fightBossBar);
-
-                    bukkitPLayer.showTitle(Title.title(Component.text(title).asComponent(), Component.text(subtitle).asComponent()));
-                    bukkitPLayer.playSound(player.getBukkitPlayer().getLocation(), Sound.ENTITY_ENDER_DRAGON_DEATH, 1f, 1f);
-                }
-            }
-        }.runTaskLater(getInstance(), 20L);
 
         getGameManager().removeGame();
     }
@@ -268,27 +162,22 @@ public class DefaultGame implements Game {
         this.phase = phase;
     }
 
-    protected void setSpawnLocation(Location spawnLocation) {
-        this.spawnLocation = spawnLocation;
+    protected void setArena(Arena arena) {
+        this.arena = arena;
     }
 
-    protected void prepareWorldForSetup() {
-        World world = getSpawnLocation().getWorld();
+    protected ActivePlayer getWinner() {
+        if (getPlayers().onlineParticipantsCount() != 1) {
+            return null;
+        }
 
-        world.setTime(1000);
-        world.setStorm(false);
-        world.setThundering(false);
-
-        world.getWorldBorder().setCenter(getSpawnLocation());
-        world.getWorldBorder().setSize(999999);
-        world.getWorldBorder().setDamageBuffer(0);
-
-        world.setGameRule(GameRules.IMMEDIATE_RESPAWN, true);
+        return getPlayers().allOnlineParticipants().stream().findAny().orElseThrow();
     }
 
-    protected void prepareWorldForGame() {
-        World world = getSpawnLocation().getWorld();
-        world.getWorldBorder().setSize(getSettings().getBorderSize(getPlayers().onlineParticipantsCount()));
+    protected void revealTerrain() {
+        for (ActivePlayer player : getPlayers().allOnlineParticipants()) {
+            DisplayWheelRegistry.TERRAIN_DISPLAY_WHEEL.reveal(player, getTerrain(), () -> {});
+        }
     }
 
     protected void endSetup() {
@@ -296,17 +185,26 @@ public class DefaultGame implements Game {
             player.prepareForGame();
         }
 
-        prepareWorldForGame();
+        getArena().closeBorder(getPlayers().onlineParticipantsCount());
         startGrindPhase();
     }
 
-    protected String getGrindCountdownBossBarName(int timer, int duration) {
-        int total = Math.max(0, duration - timer);
-        return "§e§lGrind Phase§e | " + String.format("%02d:%02d", total / 60, total % 60) + " left";
-    }
+    protected void stopWorkers() {
+        if (setupWorker != null) {
+            setupWorker.stop();
+            setupWorker = null;
+        }
 
-    protected String getFightBossBarName(int timer) {
-        int total = Math.max(0, timer);
-        return "§c§lFight Phase§c | " + String.format("%02d:%02d", total / 60, total % 60);
+        if (grindWorker != null) {
+            grindWorker.stop();
+            grindWorker.getBossBar().hideFrom(getPlayers().allOnline());
+            grindWorker = null;
+        }
+
+        if (fightWorker != null) {
+            fightWorker.stop();
+            fightWorker.getBossBar().hideFrom(getPlayers().allOnline());
+            fightWorker = null;
+        }
     }
 }

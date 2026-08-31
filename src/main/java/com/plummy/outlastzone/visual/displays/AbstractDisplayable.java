@@ -1,16 +1,14 @@
-package com.plummy.outlastzone.visual;
+package com.plummy.outlastzone.visual.displays;
 
-import com.plummy.outlastzone.core.AbstractKeyed;
 import org.bukkit.Material;
 import org.bukkit.entity.Display;
 
-public abstract class AbstractKeyedDisplayable<K, T extends Display> extends AbstractKeyed<K> implements Displayable<T> {
+public abstract class AbstractDisplayable<T extends Display> implements Displayable<T> {
 
     private final String name;
     private final Material item;
 
-    public AbstractKeyedDisplayable(K key, String name, Material item) {
-        super(key);
+    public AbstractDisplayable(String name, Material item) {
         this.name = name;
         this.item = item;
     }

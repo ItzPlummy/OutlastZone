@@ -1,5 +1,6 @@
 package com.plummy.outlastzone.players;
 
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -21,7 +22,11 @@ public interface ActivePlayer extends BasePlayer {
 
     void prepareForGame();
 
-    void eliminate();
+    void prepareForGrind();
+
+    void prepareForFight();
+
+    void eliminate(Location spectateLocation);
 
     @Override
     default @NotNull UUID getUUID() {
