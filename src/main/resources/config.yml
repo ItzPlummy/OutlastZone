@@ -13,11 +13,11 @@ terrain-search:
   # The number of suitable locations for starting a game per terrain type.
   # If there are insufficient locations in the pool, the plugin will attempt to find the missing locations, which will have a slight impact on the tick rate.
   # High values may affect the server's tick rate at startup.
-  locations-per-terrain: 3
+  locations-per-terrain: 1
 
   # The time the plugin can spend searching for missing locations per tick, in milliseconds.
   # Values above 10 will significantly impact the server tick rate.
-  # Values above 50 may likely crash the server on startup.
+  # Values above 50 may reduce the server tick rate down to unplayable numbers.
   execution-timeout-millis: 5
 
   # Origin search configuration.
