@@ -2,7 +2,7 @@
 min-players: 2
 
 # Border radius modifier per player count.
-border-radius-per-player: 25
+border-radius-per-player: 50
 
 # Terrain search configuration.
 terrain-search:
