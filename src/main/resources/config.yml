@@ -122,10 +122,10 @@ grind-stage:
       enabled: true
 
       # The minimum value by which the drop can be increased.
-      min-modifier: 100
+      min-modifier: 15
 
       # The maximum value by which the drop can be increased.
-      max-modifier: 200
+      max-modifier: 30
 
     # Smelting acceleration configuration.
     smelting-acceleration:

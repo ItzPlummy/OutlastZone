@@ -43,14 +43,14 @@ public final class OutlastZone extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        saveDefaultConfig();
+
         instance = this;
         logger = getLogger();
         settings = new Settings(getConfig());
 
         persistentPlayers.load();
         terrains.load();
-
-        saveDefaultConfig();
 
         for (World world : Bukkit.getWorlds()) {
             world.getPopulators().add(ORE_ENHANCEMENT_POPULATOR);
