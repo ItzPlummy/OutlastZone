@@ -6,22 +6,22 @@ import java.util.ArrayDeque;
 import java.util.HashMap;
 import java.util.Map;
 
-public abstract class AbstractPool<T extends Keyed, V> implements Pool<T, V> {
+public abstract class AbstractPool<K extends Keyed<?>, V> implements Pool<K, V> {
 
-    private final Map<T, ArrayDeque<V>> pools = new HashMap<>();
+    private final Map<K, ArrayDeque<V>> pools = new HashMap<>();
 
     @Override
-    public void push(T item, V value) {
+    public void push(K item, V value) {
         pools.computeIfAbsent(item, key -> new ArrayDeque<>()).push(value);
     }
 
     @Override
-    public V pop(T item) {
+    public V pop(K item) {
         return pools.computeIfAbsent(item, key -> new ArrayDeque<>()).poll();
     }
 
     @Override
-    public int size(T item) {
+    public int size(K item) {
         return pools.getOrDefault(item, new ArrayDeque<>()).size();
     }
 }

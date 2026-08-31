@@ -10,7 +10,7 @@ import org.bukkit.generator.structure.Structure;
 import java.util.Map;
 import java.util.Set;
 
-public class Terrain extends AbstractKeyedDisplayable<BlockDisplay> {
+public class Terrain extends AbstractKeyedDisplayable<String, BlockDisplay> {
 
     private final Set<Biome> biomes;
     private final Map<Structure, Set<Biome>> structures;

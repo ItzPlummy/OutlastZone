@@ -28,7 +28,7 @@ public class OutlastTabCompleter implements TabCompleter {
             case "start" -> {
                 if (args.length == 2) {
                     List<String> terrains = new ArrayList<>(List.of("*"));
-                    getTerrains().getAllTerrains().forEach(terrain -> terrains.add(terrain.getKey()));
+                    getTerrains().all().forEach(terrain -> terrains.add(terrain.getKey()));
                     return terrains;
                 }
             }

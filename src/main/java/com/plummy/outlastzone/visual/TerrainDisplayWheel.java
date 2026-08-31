@@ -11,7 +11,7 @@ public class TerrainDisplayWheel extends AbstractDisplayWheel<Terrain, BlockDisp
 
     @Override
     public List<Terrain> getAvailableDisplays() {
-        return getTerrains().getAllTerrains().stream().toList();
+        return getTerrains().all().stream().toList();
     }
 
     @Override

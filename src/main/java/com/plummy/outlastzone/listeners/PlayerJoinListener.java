@@ -16,15 +16,15 @@ public class PlayerJoinListener implements Listener {
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
-        if (!getPersistentPlayers().hasPlayer(event.getPlayer().getUniqueId())) {
-            getPersistentPlayers().addPlayer(DefaultPersistentPlayer.fromBukkitPlayer(event.getPlayer()));
+        if (!getPersistentPlayers().has(event.getPlayer().getUniqueId())) {
+            getPersistentPlayers().add(DefaultPersistentPlayer.fromBukkitPlayer(event.getPlayer()));
         }
 
         Game game = getGameManager().getGame();
-        PersistentPlayer player = getPersistentPlayers().getPlayer(event.getPlayer().getUniqueId());
+        PersistentPlayer player = getPersistentPlayers().get(event.getPlayer().getUniqueId());
 
-        if (game != null && !game.getActivePlayers().hasPlayer(player.getUUID())) {
-            game.getActivePlayers().addPlayer(new DefaultActivePlayer(player, ActivePlayerRole.SPECTATOR));
+        if (game != null && !game.getPlayers().has(player.getUUID())) {
+            game.getPlayers().add(new DefaultActivePlayer(player, ActivePlayerRole.SPECTATOR));
             player.getBukkitPlayer().teleport(game.getSpawnLocation());
         }
     }

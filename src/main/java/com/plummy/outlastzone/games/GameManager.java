@@ -12,11 +12,11 @@ public class GameManager {
 
     public void startGame(@NotNull Player player, Terrain terrain) {
         if (terrain == null) {
-            terrain = getTerrains().selectRandomTerrain();
+            terrain = getTerrains().random();
         }
 
         game = new DefaultGame(terrain);
-        game.start(game.getActivePlayers().getPlayer(player.getUniqueId()));
+        game.start(game.getPlayers().get(player.getUniqueId()));
     }
 
     public Game getGame() {

@@ -16,7 +16,6 @@ import org.bukkit.event.inventory.FurnaceStartSmeltEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 
-import static com.plummy.outlastzone.OutlastZone.getInstance;
 import static com.plummy.outlastzone.OutlastZone.getSettings;
 
 public class SmeltingEnhancementListener implements Listener {
@@ -84,8 +83,8 @@ public class SmeltingEnhancementListener implements Listener {
 
         short newCookTimeTotal = 100;
 
-        if (getInstance().getSettings().isSmeltingAccelerationEnabled()) {
-            newCookTimeTotal = (short) (newCookTimeTotal * getInstance().getSettings().getSmeltingAccelerationSpeedModifier());
+        if (getSettings().isSmeltingAccelerationEnabled()) {
+            newCookTimeTotal = (short) (newCookTimeTotal * getSettings().getSmeltingAccelerationSpeedModifier());
         }
 
         Furnace cookState = (Furnace) block.getState();

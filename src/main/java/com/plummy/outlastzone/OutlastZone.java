@@ -1,5 +1,6 @@
 package com.plummy.outlastzone;
 
+import com.plummy.outlastzone.catalogs.TerrainCatalog;
 import com.plummy.outlastzone.commands.OutlastCommand;
 import com.plummy.outlastzone.commands.OutlastTabCompleter;
 import com.plummy.outlastzone.core.Settings;
@@ -9,9 +10,8 @@ import com.plummy.outlastzone.listeners.enhancement.EnchantmentEnhancementListen
 import com.plummy.outlastzone.listeners.enhancement.FoodEnhancementListener;
 import com.plummy.outlastzone.listeners.enhancement.LootEnhancementListener;
 import com.plummy.outlastzone.listeners.enhancement.SmeltingEnhancementListener;
-import com.plummy.outlastzone.players.PersistentPlayerRepository;
 import com.plummy.outlastzone.pools.SpawnLocationPool;
-import com.plummy.outlastzone.terrain.TerrainRepository;
+import com.plummy.outlastzone.repositories.PersistentPlayerRepository;
 import com.plummy.outlastzone.workers.spawnLocation.SpawnLocationWorker;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
@@ -36,25 +36,19 @@ public final class OutlastZone extends JavaPlugin {
     private static Settings settings;
     private static Logger logger;
 
-    private static GameManager gameManager;
-    private static PersistentPlayerRepository persistentPlayers;
-
-    private static TerrainRepository terrains;
-    private static SpawnLocationPool spawnLocationPool;
-    private static SpawnLocationWorker spawnLocationWorker;
+    private static final GameManager gameManager = new GameManager();
+    private static final PersistentPlayerRepository persistentPlayers = new PersistentPlayerRepository();
+    private static final TerrainCatalog terrains = new TerrainCatalog();
+    private static final SpawnLocationPool spawnLocationPool = new SpawnLocationPool();
+    private static final SpawnLocationWorker spawnLocationWorker = new SpawnLocationWorker(Bukkit.getWorlds().getFirst(), 2);
 
     @Override
     public void onEnable() {
         instance = this;
         logger = getLogger();
         settings = new Settings(getConfig());
-
-        gameManager = new GameManager();
-        persistentPlayers = PersistentPlayerRepository.load();
-
-        terrains = TerrainRepository.load();
-        spawnLocationPool = new SpawnLocationPool();
-        spawnLocationWorker = new SpawnLocationWorker(Bukkit.getWorlds().getFirst(), 2);
+        persistentPlayers.load();
+        terrains.load();
 
         saveDefaultConfig();
 
@@ -83,9 +77,7 @@ public final class OutlastZone extends JavaPlugin {
             getPluginManager().registerEvents(listener, this);
         }
 
-        getScheduler().runTaskTimer(this, () -> {
-            spawnLocationWorker.step();
-        }, 1L, 1L);
+        getScheduler().runTaskTimer(this, spawnLocationWorker::step, 1L, 1L);
     }
 
     @Override
@@ -118,7 +110,7 @@ public final class OutlastZone extends JavaPlugin {
         return persistentPlayers;
     }
 
-    public static TerrainRepository getTerrains() {
+    public static TerrainCatalog getTerrains() {
         return terrains;
     }
 

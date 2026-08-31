@@ -17,7 +17,7 @@ public class PlayerDeathListener implements Listener {
         Game game = getGameManager().getGame();
         if (game == null) return;
 
-        ActivePlayer activePlayer = game.getActivePlayers().getPlayer(event.getPlayer().getUniqueId());
+        ActivePlayer activePlayer = game.getPlayers().get(event.getPlayer().getUniqueId());
         if (activePlayer == null || !activePlayer.isPlaying()) return;
 
         activePlayer.eliminate();

@@ -50,7 +50,7 @@ public class OutlastCommand implements CommandExecutor {
             return;
         }
 
-        Terrain terrain = args.length > 1 ? getTerrains().getTerrain(args[1]) : null;
+        Terrain terrain = args.length > 1 ? getTerrains().get(args[1]) : null;
 
         getGameManager().startGame(player, terrain);
     }

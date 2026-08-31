@@ -1,5 +1,8 @@
-package com.plummy.outlastzone.terrain;
+package com.plummy.outlastzone.catalogs;
 
+import com.plummy.outlastzone.core.data.AbstractCatalog;
+import com.plummy.outlastzone.core.data.Loadable;
+import com.plummy.outlastzone.terrain.Terrain;
 import io.papermc.paper.registry.RegistryAccess;
 import io.papermc.paper.registry.RegistryKey;
 import org.bukkit.Material;
@@ -8,21 +11,21 @@ import org.bukkit.block.Biome;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.generator.structure.Structure;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
-import java.util.*;
-import java.util.concurrent.ThreadLocalRandom;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 import static com.plummy.outlastzone.OutlastZone.getInstance;
 import static com.plummy.outlastzone.OutlastZone.logger;
 
-public class TerrainRepository {
+public class TerrainCatalog extends AbstractCatalog<String, Terrain> implements Loadable {
 
-    private final LinkedHashMap<String, Terrain> terrains = new LinkedHashMap<>();
-
-    public static TerrainRepository load() {
-        TerrainRepository controller = new TerrainRepository();
+    @Override
+    public void load() {
+        clear();
 
         File file = new File(getInstance().getDataFolder(), "terrains.yml");
 
@@ -35,7 +38,7 @@ public class TerrainRepository {
 
         if (section == null) {
             logger().warning("No terrains section found in " + file.getName());
-            return controller;
+            return;
         }
 
         for (String key : section.getKeys(false)) {
@@ -46,27 +49,8 @@ public class TerrainRepository {
                 continue;
             }
 
-            controller.addTerrain(terrain);
+            add(terrain);
         }
-
-        return controller;
-    }
-
-    private void addTerrain(Terrain terrain) {
-        terrains.putIfAbsent(terrain.getKey(), terrain);
-    }
-
-    public Terrain getTerrain(String key) {
-        return terrains.get(key);
-    }
-
-    public Collection<Terrain> getAllTerrains() {
-        return terrains.values();
-    }
-
-    public @NotNull Terrain selectRandomTerrain() {
-        List<String> keys = new ArrayList<>(terrains.keySet());
-        return getTerrain(keys.get(ThreadLocalRandom.current().nextInt(keys.size())));
     }
 
     protected static Terrain loadTerrain(ConfigurationSection section) {

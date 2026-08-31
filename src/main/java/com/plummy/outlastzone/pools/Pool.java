@@ -2,11 +2,11 @@ package com.plummy.outlastzone.pools;
 
 import com.plummy.outlastzone.core.Keyed;
 
-public interface Pool<T extends Keyed, V> {
+public interface Pool<K extends Keyed<?>, V> {
 
-    void push(T item, V value);
+    void push(K item, V value);
 
-    V pop(T item);
+    V pop(K item);
 
-    int size(T item);
+    int size(K item);
 }

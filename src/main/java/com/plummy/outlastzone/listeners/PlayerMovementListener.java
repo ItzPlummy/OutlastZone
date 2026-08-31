@@ -15,7 +15,7 @@ public class PlayerMovementListener implements Listener {
         Game game = getGameManager().getGame();
 
         if (game != null && game.isSettingUp()) {
-            ActivePlayer player = game.getActivePlayers().getPlayer(event.getPlayer().getUniqueId());
+            ActivePlayer player = game.getPlayers().get(event.getPlayer().getUniqueId());
 
             if (player != null && player.isPlaying()) {
                 event.setCancelled(true);

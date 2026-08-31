@@ -1,7 +1,7 @@
 package com.plummy.outlastzone.games;
 
 import com.plummy.outlastzone.players.ActivePlayer;
-import com.plummy.outlastzone.players.ActivePlayerRepository;
+import com.plummy.outlastzone.repositories.ActivePlayerRepository;
 import com.plummy.outlastzone.terrain.Terrain;
 import com.plummy.outlastzone.visual.DisplayWheelRegistry;
 import net.kyori.adventure.bossbar.BossBar;
@@ -24,7 +24,7 @@ import static com.plummy.outlastzone.OutlastZone.*;
 public class DefaultGame implements Game {
 
     private final Terrain terrain;
-    private final ActivePlayerRepository activePlayers = ActivePlayerRepository.create();
+    private final ActivePlayerRepository activePlayers;
 
     private final BossBar grindCountdownBossBar = BossBar.bossBar(
             Component.text("Grind Phase"),
@@ -48,6 +48,9 @@ public class DefaultGame implements Game {
 
     public DefaultGame(Terrain terrain) {
         this.terrain = terrain;
+        this.activePlayers = new ActivePlayerRepository();
+
+        activePlayers.load();
     }
 
     @Override
@@ -61,7 +64,7 @@ public class DefaultGame implements Game {
     }
 
     @Override
-    public ActivePlayerRepository getActivePlayers() {
+    public ActivePlayerRepository getPlayers() {
         return activePlayers;
     }
 
@@ -77,7 +80,7 @@ public class DefaultGame implements Game {
         Location spawnLocation = getSpawnLocationPool().pop(getTerrain());
 
         if (spawnLocation == null) {
-            getActivePlayers().messageToActionBar("§cLocation is not prepared. Try again later");
+            getPlayers().messageToActionBar("§cLocation is not prepared. Try again later");
             finish(GameFinishReason.NO_LOCATION_FOUND);
             return;
         }
@@ -86,8 +89,8 @@ public class DefaultGame implements Game {
 
         setPhase(GamePhase.SETUP);
 
-        for (ActivePlayer player : getActivePlayers().getParticipants()) {
-            int maxDistanceFromSpawn = getSettings().getBorderSize(getActivePlayers().getParticipantsCount()) / 2;
+        for (ActivePlayer player : getPlayers().allOnlineParticipants()) {
+            int maxDistanceFromSpawn = getSettings().getBorderSize(getPlayers().onlineParticipantsCount()) / 2;
             double angle = ThreadLocalRandom.current().nextDouble() * Math.PI * 2;
 
             Location playerSpawn = getSpawnLocation().clone().add((int) Math.cos(angle) * maxDistanceFromSpawn, 0, (int) Math.sin(angle) * maxDistanceFromSpawn);
@@ -103,7 +106,7 @@ public class DefaultGame implements Game {
 
             @Override
             public void run() {
-                for (ActivePlayer player : getActivePlayers().getParticipants()) {
+                for (ActivePlayer player : getPlayers().allOnlineParticipants()) {
                     DisplayWheelRegistry.TERRAIN_DISPLAY_WHEEL.reveal(player, getTerrain(), () -> {});
                 }
             }
@@ -133,9 +136,8 @@ public class DefaultGame implements Game {
         grindCountdownBossBar.name(Component.text(getGrindCountdownBossBarName(0, durationSeconds)));
         grindCountdownBossBar.progress(0);
 
-        for (ActivePlayer player : getActivePlayers().getAllOnlinePlayers()) {
+        for (ActivePlayer player : getPlayers().allOnline()) {
             player.getBukkitPlayer().removePotionEffect(PotionEffectType.GLOWING);
-
             player.getBukkitPlayer().hideBossBar(fightBossBar);
             player.getBukkitPlayer().showBossBar(grindCountdownBossBar);
         }
@@ -151,7 +153,7 @@ public class DefaultGame implements Game {
                 grindCountdownBossBar.progress((float) timer / durationSeconds);
                 grindCountdownBossBar.name(Component.text(getGrindCountdownBossBarName(timer, durationSeconds)));
 
-                for (ActivePlayer player : getActivePlayers().getAllOnlinePlayers()) {
+                for (ActivePlayer player : getPlayers().allOnline()) {
                     player.getBukkitPlayer().hideBossBar(fightBossBar);
                     player.getBukkitPlayer().showBossBar(grindCountdownBossBar);
                 }
@@ -167,7 +169,7 @@ public class DefaultGame implements Game {
     public void startFightPhase() {
         setPhase(GamePhase.FIGHTING);
 
-        int newBorderSize = getSettings().getBorderSize(getActivePlayers().getParticipantsCount() - 1);
+        int newBorderSize = getSettings().getBorderSize(getPlayers().onlineParticipantsCount() - 1);
         int shrinkDuration = getSettings().getFightStageBorderNarrowingDurationSeconds() * 20;
 
         getSpawnLocation().getWorld().getWorldBorder().changeSize(newBorderSize, shrinkDuration);
@@ -181,9 +183,8 @@ public class DefaultGame implements Game {
         fightBossBar.name(Component.text(getFightBossBarName(0)));
         fightBossBar.progress(1);
 
-        for (ActivePlayer player : getActivePlayers().getAllOnlinePlayers()) {
+        for (ActivePlayer player : getPlayers().allOnline()) {
             player.getBukkitPlayer().addPotionEffect(new PotionEffect(PotionEffectType.GLOWING, 9999999, 0, false, false, false));
-
             player.getBukkitPlayer().hideBossBar(grindCountdownBossBar);
             player.getBukkitPlayer().showBossBar(fightBossBar);
         }
@@ -199,7 +200,7 @@ public class DefaultGame implements Game {
                 fightBossBar.progress(1);
                 fightBossBar.name(Component.text(getFightBossBarName(timer)));
 
-                for (ActivePlayer player : getActivePlayers().getAllOnlinePlayers()) {
+                for (ActivePlayer player : getPlayers().allOnline()) {
                     player.getBukkitPlayer().hideBossBar(grindCountdownBossBar);
                     player.getBukkitPlayer().showBossBar(fightBossBar);
                 }
@@ -218,7 +219,7 @@ public class DefaultGame implements Game {
         fightTask = null;
 
         if (reason == GameFinishReason.STOP_COMMAND_EXECUTED) {
-            for (ActivePlayer player : getActivePlayers().getAllOnlinePlayers()) {
+            for (ActivePlayer player : getPlayers().allOnline()) {
                 Player bukkitPLayer = player.getBukkitPlayer();
 
                 bukkitPLayer.hideBossBar(grindCountdownBossBar);
@@ -237,8 +238,8 @@ public class DefaultGame implements Game {
         String title = "§cGame Over";
         String subtitle;
 
-        if (getActivePlayers().getParticipantsCount() == 1) {
-            ActivePlayer lastPlayer = getActivePlayers().getParticipants().stream().findAny().orElseThrow();
+        if (getPlayers().onlineParticipantsCount() == 1) {
+            ActivePlayer lastPlayer = getPlayers().allOnlineParticipants().stream().findAny().orElseThrow();
             subtitle = "§c" + lastPlayer.getName() + " outlasted everyone!";
         } else {
             subtitle = "";
@@ -248,7 +249,7 @@ public class DefaultGame implements Game {
 
             @Override
             public void run() {
-                for (ActivePlayer player : getActivePlayers().getAllOnlinePlayers()) {
+                for (ActivePlayer player : getPlayers().allOnline()) {
                     Player bukkitPLayer = player.getBukkitPlayer();
 
                     bukkitPLayer.hideBossBar(grindCountdownBossBar);
@@ -287,16 +288,15 @@ public class DefaultGame implements Game {
 
     protected void prepareWorldForGame() {
         World world = getSpawnLocation().getWorld();
-        world.getWorldBorder().setSize(getSettings().getBorderSize(getActivePlayers().getParticipantsCount()));
+        world.getWorldBorder().setSize(getSettings().getBorderSize(getPlayers().onlineParticipantsCount()));
     }
 
     protected void endSetup() {
-        for (ActivePlayer player : getActivePlayers().getParticipants()) {
+        for (ActivePlayer player : getPlayers().allOnlineParticipants()) {
             player.prepareForGame();
         }
 
         prepareWorldForGame();
-
         startGrindPhase();
     }
 

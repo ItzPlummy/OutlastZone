@@ -1,6 +1,6 @@
 package com.plummy.outlastzone.core;
 
-public interface Keyed {
+public interface Keyed<K> {
 
-    String getKey();
+    K getKey();
 }

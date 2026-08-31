@@ -82,7 +82,7 @@ public class SpawnLocationWorker extends AbstractWorker {
 
         NavigableMap<Integer, Collection<Terrain>> terrainsByFoundLocationsCount = new TreeMap<>();
 
-        for (Terrain terrain : getTerrains().getAllTerrains()) {
+        for (Terrain terrain : getTerrains().all()) {
             int foundLocationsCount = getSpawnLocationPool().size(terrain);
             terrainsByFoundLocationsCount.computeIfAbsent(foundLocationsCount, key -> new ArrayList<>()).add(terrain);
         }

@@ -21,7 +21,7 @@ public class PlayerDamageListener implements Listener {
         Game game = getGameManager().getGame();
 
         if (game != null && game.getPhase() == GamePhase.FIGHTING) {
-            ActivePlayer activePlayer = game.getActivePlayers().getPlayer(player.getUniqueId());
+            ActivePlayer activePlayer = game.getPlayers().get(player.getUniqueId());
 
             if (activePlayer != null && activePlayer.isPlaying()) {
                 return;

@@ -1,24 +1,25 @@
-package com.plummy.outlastzone.players;
+package com.plummy.outlastzone.repositories;
 
+import com.plummy.outlastzone.core.data.AbstractRepository;
+import com.plummy.outlastzone.core.data.Persistent;
+import com.plummy.outlastzone.players.DefaultPersistentPlayer;
+import com.plummy.outlastzone.players.PersistentPlayer;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Collection;
-import java.util.LinkedHashMap;
 import java.util.UUID;
 
 import static com.plummy.outlastzone.OutlastZone.getInstance;
 import static com.plummy.outlastzone.OutlastZone.logger;
 
-public class PersistentPlayerRepository {
+public class PersistentPlayerRepository extends AbstractRepository<UUID, PersistentPlayer> implements PlayerRepository<PersistentPlayer>, Persistent {
 
-    private final LinkedHashMap<UUID, PersistentPlayer> players = new LinkedHashMap<>();
-
-    public static PersistentPlayerRepository load() {
-        PersistentPlayerRepository players = new PersistentPlayerRepository();
+    @Override
+    public void load() {
+        clear();
 
         File file = new File(getInstance().getDataFolder(), "players.yml");
 
@@ -26,7 +27,7 @@ public class PersistentPlayerRepository {
         ConfigurationSection section = config.getConfigurationSection("players");
 
         if (section == null) {
-            return players;
+            return;
         }
 
         for (String uuid : section.getKeys(false)) {
@@ -36,19 +37,18 @@ public class PersistentPlayerRepository {
                 continue;
             }
 
-            players.addPlayer(player);
+            add(player);
         }
-
-        return players;
     }
 
+    @Override
     public void save() {
         File file = new File(getInstance().getDataFolder(), "players.yml");
 
         YamlConfiguration config = new YamlConfiguration();
         ConfigurationSection section = config.createSection("players");
 
-        for (PersistentPlayer player : players.values()) {
+        for (PersistentPlayer player : all()) {
             ConfigurationSection playerSection = section.createSection(player.getUUID().toString());
             savePlayer(playerSection, player);
         }
@@ -58,26 +58,6 @@ public class PersistentPlayerRepository {
         } catch (IOException exception) {
             logger().severe("Failed to save persistent players data to " + file.getName() + ": " + exception.getMessage());
         }
-    }
-
-    public void addPlayer(PersistentPlayer player) {
-        players.putIfAbsent(player.getUUID(), player);
-    }
-
-    public PersistentPlayer getPlayer(UUID uuid) {
-        return players.get(uuid);
-    }
-
-    public @NotNull Collection<PersistentPlayer> getAllPlayers() {
-        return players.values();
-    }
-
-    public boolean hasPlayer(UUID uuid) {
-        return players.containsKey(uuid);
-    }
-
-    public void removePlayer(UUID uuid) {
-        players.remove(uuid);
     }
 
     protected static PersistentPlayer loadPlayer(ConfigurationSection section) {

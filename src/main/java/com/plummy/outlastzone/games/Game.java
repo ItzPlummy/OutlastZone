@@ -1,7 +1,7 @@
 package com.plummy.outlastzone.games;
 
 import com.plummy.outlastzone.players.ActivePlayer;
-import com.plummy.outlastzone.players.ActivePlayerRepository;
+import com.plummy.outlastzone.repositories.ActivePlayerRepository;
 import com.plummy.outlastzone.terrain.Terrain;
 import org.bukkit.Location;
 
@@ -11,7 +11,7 @@ public interface Game {
 
     Terrain getTerrain();
 
-    ActivePlayerRepository getActivePlayers();
+    ActivePlayerRepository getPlayers();
 
     Location getSpawnLocation();
 

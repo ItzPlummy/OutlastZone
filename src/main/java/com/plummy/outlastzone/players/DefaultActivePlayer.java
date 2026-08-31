@@ -108,7 +108,7 @@ public class DefaultActivePlayer implements ActivePlayer {
             return;
         }
 
-        if (game.getActivePlayers().getParticipantsCount() <= 1) {
+        if (game.getPlayers().onlineParticipantsCount() <= 1) {
             game.finish(GameFinishReason.PLAYER_OUTLASTED);
             return;
         }
