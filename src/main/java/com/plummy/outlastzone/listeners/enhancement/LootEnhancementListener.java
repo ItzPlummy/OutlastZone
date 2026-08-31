@@ -1,8 +1,8 @@
 package com.plummy.outlastzone.listeners.enhancement;
 
 import com.destroystokyo.paper.MaterialTags;
-import com.plummy.outlastzone.games.Game;
-import com.plummy.outlastzone.games.GamePhase;
+import com.plummy.outlastzone.core.games.Game;
+import com.plummy.outlastzone.core.games.GamePhase;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Item;

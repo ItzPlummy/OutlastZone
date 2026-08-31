@@ -1,0 +1,21 @@
+package com.plummy.outlastzone.core.visual.displays;
+
+import com.plummy.outlastzone.core.keyed.Terrain;
+import org.bukkit.entity.BlockDisplay;
+
+import java.util.List;
+
+import static com.plummy.outlastzone.OutlastZone.getTerrains;
+
+public class TerrainDisplayWheel extends AbstractDisplayWheel<Terrain, BlockDisplay> {
+
+    @Override
+    public List<Terrain> getAvailableDisplays() {
+        return getTerrains().all().stream().toList();
+    }
+
+    @Override
+    public String getRevealMessage(Terrain item) {
+        return "§eTerrain: " + item.getName();
+    }
+}

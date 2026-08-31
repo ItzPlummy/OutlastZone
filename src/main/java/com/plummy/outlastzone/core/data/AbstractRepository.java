@@ -1,6 +1,6 @@
 package com.plummy.outlastzone.core.data;
 
-import com.plummy.outlastzone.core.Keyed;
+import com.plummy.outlastzone.core.keyed.Keyed;
 
 public class AbstractRepository<K, V extends Keyed<K>> extends AbstractCatalog<K, V> implements Repository<K, V> {
 

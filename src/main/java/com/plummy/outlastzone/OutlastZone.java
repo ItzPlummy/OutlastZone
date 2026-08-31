@@ -1,18 +1,18 @@
 package com.plummy.outlastzone;
 
-import com.plummy.outlastzone.catalogs.TerrainCatalog;
+import com.plummy.outlastzone.core.data.catalogs.TerrainCatalog;
 import com.plummy.outlastzone.commands.OutlastCommand;
 import com.plummy.outlastzone.commands.OutlastTabCompleter;
 import com.plummy.outlastzone.core.Settings;
-import com.plummy.outlastzone.games.GameManager;
+import com.plummy.outlastzone.core.games.GameManager;
 import com.plummy.outlastzone.listeners.*;
 import com.plummy.outlastzone.listeners.enhancement.EnchantmentEnhancementListener;
 import com.plummy.outlastzone.listeners.enhancement.FoodEnhancementListener;
 import com.plummy.outlastzone.listeners.enhancement.LootEnhancementListener;
 import com.plummy.outlastzone.listeners.enhancement.SmeltingEnhancementListener;
-import com.plummy.outlastzone.pools.SpawnLocationPool;
-import com.plummy.outlastzone.repositories.PersistentPlayerRepository;
-import com.plummy.outlastzone.workers.spawnLocation.SpawnLocationWorker;
+import com.plummy.outlastzone.core.pools.SpawnLocationPool;
+import com.plummy.outlastzone.core.data.repositories.PersistentPlayerRepository;
+import com.plummy.outlastzone.core.workers.spawnLocation.SpawnLocationWorker;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.World;

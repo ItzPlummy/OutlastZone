@@ -1,8 +1,8 @@
 package com.plummy.outlastzone.commands;
 
-import com.plummy.outlastzone.games.Game;
-import com.plummy.outlastzone.games.GameFinishReason;
-import com.plummy.outlastzone.terrain.Terrain;
+import com.plummy.outlastzone.core.games.Game;
+import com.plummy.outlastzone.core.games.GameFinishReason;
+import com.plummy.outlastzone.core.keyed.Terrain;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;

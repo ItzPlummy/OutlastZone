@@ -1,6 +1,6 @@
 package com.plummy.outlastzone.core.data;
 
-import com.plummy.outlastzone.core.Keyed;
+import com.plummy.outlastzone.core.keyed.Keyed;
 
 public interface Repository<K, V extends Keyed<K>> extends Catalog<K, V> {
 

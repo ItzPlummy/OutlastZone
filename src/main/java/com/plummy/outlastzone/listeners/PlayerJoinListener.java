@@ -1,11 +1,11 @@
 package com.plummy.outlastzone.listeners;
 
-import com.plummy.outlastzone.games.Game;
-import com.plummy.outlastzone.players.ActivePlayerRole;
-import com.plummy.outlastzone.players.DefaultActivePlayer;
-import com.plummy.outlastzone.players.DefaultPersistentPlayer;
-import com.plummy.outlastzone.players.PersistentPlayer;
-import com.plummy.outlastzone.visual.bossBars.BossBarDisplay;
+import com.plummy.outlastzone.core.games.Game;
+import com.plummy.outlastzone.core.players.ActivePlayerRole;
+import com.plummy.outlastzone.core.players.DefaultActivePlayer;
+import com.plummy.outlastzone.core.players.DefaultPersistentPlayer;
+import com.plummy.outlastzone.core.players.PersistentPlayer;
+import com.plummy.outlastzone.core.visual.bossBars.BossBarDisplay;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;

@@ -1,6 +1,6 @@
 package com.plummy.outlastzone.core.data;
 
-import com.plummy.outlastzone.core.Keyed;
+import com.plummy.outlastzone.core.keyed.Keyed;
 
 import java.util.Collection;
 import java.util.concurrent.ThreadLocalRandom;

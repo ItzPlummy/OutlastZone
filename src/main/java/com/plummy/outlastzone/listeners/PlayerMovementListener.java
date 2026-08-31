@@ -1,7 +1,7 @@
 package com.plummy.outlastzone.listeners;
 
-import com.plummy.outlastzone.games.Game;
-import com.plummy.outlastzone.players.ActivePlayer;
+import com.plummy.outlastzone.core.games.Game;
+import com.plummy.outlastzone.core.players.ActivePlayer;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerMoveEvent;
