@@ -74,6 +74,7 @@ public class OutlastCommand implements CommandExecutor {
     protected void reload(CommandSender sender) {
         getInstance().reloadConfig();
         getSettings().reload(getInstance().getConfig());
+        getTerrains().load();
     }
 
     protected void help(CommandSender sender) {

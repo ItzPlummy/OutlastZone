@@ -243,7 +243,7 @@ public class SpawnLocationWorker extends AbstractWorker {
         Location optimalLocation = optimalLocationSelectContext.getOptimalLocation(getSettings().getOptimalSelectionThreshold());
 
         if (optimalLocation != null) {
-            getSpawnLocationPool().push(terrain, optimalLocation);
+            getSpawnLocationPool().push(terrain, new Location(world, (double) optimalLocation.getBlockX() + 0.5, getSettings().getTerrainSearchOptimalY(), (double) optimalLocation.getBlockZ() + 0.5));
         }
     }
 

@@ -40,13 +40,13 @@ public final class OutlastZone extends JavaPlugin {
     private static final PersistentPlayerRepository persistentPlayers = new PersistentPlayerRepository();
     private static final TerrainCatalog terrains = new TerrainCatalog();
     private static final SpawnLocationPool spawnLocationPool = new SpawnLocationPool();
-    private static final SpawnLocationWorker spawnLocationWorker = new SpawnLocationWorker(Bukkit.getWorlds().getFirst(), 2);
 
     @Override
     public void onEnable() {
         instance = this;
         logger = getLogger();
         settings = new Settings(getConfig());
+
         persistentPlayers.load();
         terrains.load();
 
@@ -77,13 +77,14 @@ public final class OutlastZone extends JavaPlugin {
             getPluginManager().registerEvents(listener, this);
         }
 
+        SpawnLocationWorker spawnLocationWorker = new SpawnLocationWorker(Bukkit.getWorlds().getFirst(), 2);
         getScheduler().runTaskTimer(this, spawnLocationWorker::step, 1L, 1L);
     }
 
     @Override
     public void onDisable() {
         Bukkit.getScheduler().cancelTasks(this);
-        persistentPlayers.save();
+        getPersistentPlayers().save();
     }
 
     public static NamespacedKey getNamespacedKey() {
