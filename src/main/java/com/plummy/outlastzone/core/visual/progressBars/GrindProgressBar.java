@@ -1,12 +1,12 @@
-package com.plummy.outlastzone.core.visual.bossBars;
+package com.plummy.outlastzone.core.visual.progressBars;
 
 import net.kyori.adventure.bossbar.BossBar;
 
-public class GrindBossBar extends AbstractBossBarDisplay {
+public class GrindProgressBar extends AbstractProgressBar {
 
     private final int durationSeconds;
 
-    public GrindBossBar(int durationSeconds) {
+    public GrindProgressBar(int durationSeconds) {
         super(BossBar.Color.YELLOW, BossBar.Overlay.PROGRESS);
         this.durationSeconds = durationSeconds;
     }

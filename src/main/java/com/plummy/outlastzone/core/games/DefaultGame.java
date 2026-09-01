@@ -8,7 +8,7 @@ import com.plummy.outlastzone.core.workers.phase.SetupPhaseWorker;
 import com.plummy.outlastzone.core.players.ActivePlayer;
 import com.plummy.outlastzone.core.data.repositories.ActivePlayerRepository;
 import com.plummy.outlastzone.core.keyed.Terrain;
-import com.plummy.outlastzone.core.visual.bossBars.BossBarDisplay;
+import com.plummy.outlastzone.core.visual.progressBars.ProgressBar;
 import com.plummy.outlastzone.core.visual.announcers.DefaultAnnouncer;
 import com.plummy.outlastzone.core.visual.displays.DisplayWheelRegistry;
 import com.plummy.outlastzone.core.visual.announcers.Announcer;
@@ -62,7 +62,7 @@ public class DefaultGame implements Game {
     }
 
     @Override
-    public BossBarDisplay getActiveBossBar() {
+    public ProgressBar getActiveBossBar() {
         if (grindWorker != null) {
             return grindWorker.getBossBar();
         }

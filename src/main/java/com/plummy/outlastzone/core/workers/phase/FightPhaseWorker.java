@@ -1,21 +1,21 @@
 package com.plummy.outlastzone.core.workers.phase;
 
 import com.plummy.outlastzone.core.data.repositories.ActivePlayerRepository;
-import com.plummy.outlastzone.core.visual.bossBars.BossBarDisplay;
-import com.plummy.outlastzone.core.visual.bossBars.FightBossBar;
+import com.plummy.outlastzone.core.visual.progressBars.ProgressBar;
+import com.plummy.outlastzone.core.visual.progressBars.FightProgressBar;
 import com.plummy.outlastzone.core.workers.AbstractPhaseWorker;
 
 public class FightPhaseWorker extends AbstractPhaseWorker {
 
     private final ActivePlayerRepository players;
-    private final BossBarDisplay bossBar;
+    private final ProgressBar bossBar;
 
     public FightPhaseWorker(ActivePlayerRepository players) {
         this.players = players;
-        this.bossBar = new FightBossBar();
+        this.bossBar = new FightProgressBar();
     }
 
-    public BossBarDisplay getBossBar() {
+    public ProgressBar getBossBar() {
         return bossBar;
     }
 

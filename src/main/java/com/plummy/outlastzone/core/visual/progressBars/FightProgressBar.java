@@ -1,10 +1,10 @@
-package com.plummy.outlastzone.core.visual.bossBars;
+package com.plummy.outlastzone.core.visual.progressBars;
 
 import net.kyori.adventure.bossbar.BossBar;
 
-public class FightBossBar extends AbstractBossBarDisplay {
+public class FightProgressBar extends AbstractProgressBar {
 
-    public FightBossBar() {
+    public FightProgressBar() {
         super(BossBar.Color.RED, BossBar.Overlay.PROGRESS);
     }
 

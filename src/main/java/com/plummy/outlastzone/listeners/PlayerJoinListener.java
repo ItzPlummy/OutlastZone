@@ -5,7 +5,7 @@ import com.plummy.outlastzone.core.players.ActivePlayerRole;
 import com.plummy.outlastzone.core.players.DefaultActivePlayer;
 import com.plummy.outlastzone.core.players.DefaultPersistentPlayer;
 import com.plummy.outlastzone.core.players.PersistentPlayer;
-import com.plummy.outlastzone.core.visual.bossBars.BossBarDisplay;
+import com.plummy.outlastzone.core.visual.progressBars.ProgressBar;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -34,7 +34,7 @@ public class PlayerJoinListener implements Listener {
             player.getBukkitPlayer().teleport(game.getSpawnLocation());
         }
 
-        BossBarDisplay activeBossBar = game.getActiveBossBar();
+        ProgressBar activeBossBar = game.getActiveBossBar();
 
         if (activeBossBar != null) {
             activeBossBar.showTo(game.getPlayers().get(player.getUUID()));

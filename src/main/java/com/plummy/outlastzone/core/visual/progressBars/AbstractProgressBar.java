@@ -1,14 +1,14 @@
-package com.plummy.outlastzone.core.visual.bossBars;
+package com.plummy.outlastzone.core.visual.progressBars;
 
 import com.plummy.outlastzone.core.players.BasePlayer;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 
-public abstract class AbstractBossBarDisplay implements BossBarDisplay {
+public abstract class AbstractProgressBar implements ProgressBar {
 
     private final BossBar bossBar;
 
-    public AbstractBossBarDisplay(BossBar.Color color, BossBar.Overlay overlay) {
+    public AbstractProgressBar(BossBar.Color color, BossBar.Overlay overlay) {
         this.bossBar = BossBar.bossBar(Component.empty(), 0, color, overlay);
     }
 

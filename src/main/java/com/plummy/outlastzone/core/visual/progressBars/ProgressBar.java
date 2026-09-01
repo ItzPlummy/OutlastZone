@@ -1,10 +1,10 @@
-package com.plummy.outlastzone.core.visual.bossBars;
+package com.plummy.outlastzone.core.visual.progressBars;
 
 import com.plummy.outlastzone.core.players.BasePlayer;
 
 import java.util.Collection;
 
-public interface BossBarDisplay {
+public interface ProgressBar {
 
     void update(int elapsed);
 
