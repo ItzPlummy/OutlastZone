@@ -111,15 +111,15 @@ public class SpawnLocationWorker extends AbstractWorker {
         }
 
         if (originSearchContext.getBiomes() == null) {
-            Map.Entry<Structure, Set<Biome>> structures = terrain.getStructures()
-                    .entrySet()
+            Structure structure = terrain.getStructures()
+                    .keySet()
                     .stream()
                     .skip(ThreadLocalRandom.current().nextInt(terrain.getStructures().size()))
                     .findFirst()
                     .orElseThrow();
 
-            structureSearchContext.setStructure(structures.getKey());
-            originSearchContext.setBiomes(structures.getValue());
+            structureSearchContext.setStructure(structure);
+            originSearchContext.setBiomes(terrain.getStructureBiomes(structure));
         }
 
         while (true) {

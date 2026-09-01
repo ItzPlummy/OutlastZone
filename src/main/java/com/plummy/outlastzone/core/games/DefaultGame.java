@@ -9,9 +9,9 @@ import com.plummy.outlastzone.core.players.ActivePlayer;
 import com.plummy.outlastzone.core.data.repositories.ActivePlayerRepository;
 import com.plummy.outlastzone.core.keyed.Terrain;
 import com.plummy.outlastzone.core.visual.bossBars.BossBarDisplay;
-import com.plummy.outlastzone.core.visual.announcers.DefaultGameAnnouncer;
+import com.plummy.outlastzone.core.visual.announcers.DefaultAnnouncer;
 import com.plummy.outlastzone.core.visual.displays.DisplayWheelRegistry;
-import com.plummy.outlastzone.core.visual.announcers.GameAnnouncer;
+import com.plummy.outlastzone.core.visual.announcers.Announcer;
 import org.bukkit.Location;
 
 import static com.plummy.outlastzone.OutlastZone.*;
@@ -20,7 +20,7 @@ public class DefaultGame implements Game {
 
     private final Terrain terrain;
     private final ActivePlayerRepository activePlayers;
-    private final GameAnnouncer announcer;
+    private final Announcer announcer;
 
     private GamePhase phase = GamePhase.IDLE;
 
@@ -32,7 +32,7 @@ public class DefaultGame implements Game {
     public DefaultGame(Terrain terrain) {
         this.terrain = terrain;
         this.activePlayers = new ActivePlayerRepository();
-        this.announcer = new DefaultGameAnnouncer(getPlayers());
+        this.announcer = new DefaultAnnouncer(getPlayers());
 
         getPlayers().load();
     }
@@ -52,7 +52,7 @@ public class DefaultGame implements Game {
         return activePlayers;
     }
 
-    public GameAnnouncer getAnnouncer() {
+    public Announcer getAnnouncer() {
         return announcer;
     }
 

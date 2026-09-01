@@ -10,11 +10,11 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import static com.plummy.outlastzone.OutlastZone.getInstance;
 
-public class DefaultGameAnnouncer implements GameAnnouncer {
+public class DefaultAnnouncer implements Announcer {
 
     private final ActivePlayerRepository players;
 
-    public DefaultGameAnnouncer(ActivePlayerRepository players) {
+    public DefaultAnnouncer(ActivePlayerRepository players) {
         this.players = players;
     }
 

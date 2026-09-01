@@ -2,7 +2,7 @@ package com.plummy.outlastzone.core.visual.announcers;
 
 import com.plummy.outlastzone.core.players.ActivePlayer;
 
-public interface GameAnnouncer {
+public interface Announcer {
 
     void locationNotReady();
 
